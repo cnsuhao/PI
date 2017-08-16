@@ -1,6 +1,28 @@
 #ifndef __JZ_LOADER_H__
 #define __JZ_LOADER_H__
 #include <Windows.h>
+#include <tchar.h>
+
+// 最大字符串长度定义
+#ifndef MAX_PATH
+#	define MAX_PATH		260
+#endif // !MAX_PATH
+
+// 环境变量的缺省最大长度，如果系统环境变量长度大于该值时，可选择修改此值。
+#ifndef JZENV_MAX_LENGTH
+#	define JZENV_MAX_LENGTH	4096
+#endif // !JZENV_MAX_LENGTH
+
+
+
+//	库相对路径与库后缀名声明
+#define JZDLL_POSTFIX_DEBUG			_T("d.dll")
+#define JZDLL_POSTFIX_RELEASE		_T(".dll")
+#define JZDIR_SEPARATOR				_T('\\')
+#define JZDIR_SEPARATOR_S			_T("\\")
+#define JZENV_SEPARATOR				_T(';')
+#define JZENV_SEPARATOR_S				_T(";")
+
 
 // dll释放函数
 inline void JZDLL_Unload(HMODULE hDLL)
@@ -12,16 +34,41 @@ inline void JZDLL_Unload(HMODULE hDLL)
 	}
 }
 
-// dll加载函数
-inline HMODULE JZDLL_Load(LPCTSTR szDLLParentPathLPCTSTR, 
-	LPCTSTR* pszEnvRefDebug,		// 加载库在 CoreDLL 目录下需要设置的环境变量的相对路径
-	intptr_t nEnvDebugCount,		// 环境变量相对路径的个数（包括加载库自身所在的相对路径）
-	LPCTSTR *pszEnvRefRelease,
-	intptr_t nEnvReleaseCount,
-	LPCTSTR szDLLName,			// 加载库的名字
-	LPCSTR szAPIExtName,			// 加载库导出接口的名字
-	void* *ppAPI)					// 输出功能组接口指针
+// 加载库子函数
+inline HMODULE _JZDLL_LoadLibrary(LPCTSTR szDLLName, // 动态库名，不包含扩展名 
+								  LPCTSTR szPostfix) // 后缀名，包含了扩展名
 {
+	TCHAR s_name[MAX_PATH] = { 0 };
+	s_name[0] = '\0';
+	_tcscpy(s_name, szDLLName);
+	_tcscat(s_name, szPostfix);
+	return LoadLibrary(s_name);
+}
+
+typedef void* (*DefGetAPIStuPtr)();
+// 
+inline void _JZDLL_GetAPI(HMODULE& hDLL,			// 已加载的库句柄
+						  LPCSTR szAPIExportName,	// 加载库导出接口的名字
+						  void** ppAPI)				// 输出功能组接口指针
+{
+	DefGetAPIStuPtr pfnGet = reinterpret_cast<DefGetAPIStuPtr>(GetProcAddress(hDLL, szAPIExportName));
+	*ppAPI = pfnGet();
+	if (NULL == *ppAPI)
+	{
+		JZDLL_Unload(hDLL);	// 如果导出接口不成功，则释放 DLL
+		hDLL = NULL;
+	}
+}
+
+
+
+// dll加载函数
+inline HMODULE JZDLL_Load(
+	LPCTSTR szDLLName,				// 加载库的名字
+	LPCSTR szAPIExtName,			// 加载库导出接口的名字
+	void** ppAPI)					// 输出功能组接口指针
+{
+	// 参数检查
 	if (NULL == szDLLName || NULL == szAPIExtName)
 	{
 		return NULL;
@@ -29,6 +76,81 @@ inline HMODULE JZDLL_Load(LPCTSTR szDLLParentPathLPCTSTR,
 
 	HMODULE hDLL = NULL;
 
+	// 预先加载一次，避免重复的搜索缺省路径，尤其是单件加载器被多个库调用时
+#ifdef _DEBUG
+	hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG); // 如果系统处于 DEBUG 模式下时，尝试导入 DEBUG 版本库
+#endif // _DEBUG
+	if (NULL == hDLL) // 如果不在 DEBUG 模式下或导入 DEBUG 版本库失败，则尝试导入 RELEASE 版本库
+	{
+		hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG);
+	}
+
+	_JZDLL_GetAPI(hDLL, szAPIExtName, ppAPI);
+	if (NULL != hDLL) // 如果加载成功则直接返回，否则继续执行下面代码进行搜索
+	{
+		return hDLL;
+	}
+
+	TCHAR s_top[MAX_PATH] = { 0 };
+	TCHAR s_env[JZENV_MAX_LENGTH] = { 0 };
+	TCHAR s_path[MAX_PATH] = { 0 };
+	s_top[0] = '\0';
+	s_env[0] = '\0';
+	s_path[0] = '\0';
+	bool has_dll_path = true;
+
+	TCHAR s_search[MAX_PATH] = { 0 };
+	s_search[0] = '\0';
+
+
+	LPCTSTR p_separator = NULL;
+	GetModuleFileName(NULL, s_top, MAX_PATH - 1);
+	for (int i = 0; i < 4; i++)
+	{
+		p_separator = _tcsrchr(s_top, JZDIR_SEPARATOR);
+		if (NULL == p_separator)
+		{
+			return NULL;
+		}
+		*(LPTSTR)p_separator = '\0';
+	}
+	_tcscat(s_top, JZDIR_SEPARATOR_S);
+
+#ifdef _DEBUG
+#		ifdef _WIN64
+			_tcscat(s_top, _T("dll\\x64\\Debug"));
+#		else
+			_tcscat(s_top, _T("dll\\Win32\\Debug"));
+#		endif // _WIN64
+#	else
+#		ifdef _WIN64
+			_tcscat(s_top, _T("dll\\x64\\Release"));
+#		else
+			_tcscat(s_top, _T("dll\\Win32\\Release"));
+#		endif // _WIN64
+#endif // _DEBUG
+
+
+	GetEnvironmentVariable(_T("Path"), s_env, JZENV_MAX_LENGTH - 1);
+	_tcscat(s_env, JZENV_SEPARATOR_S);
+
+	// 如果系统环境变量拥有当前环境变量则不再加入
+	if (NULL == _tcsstr(s_env, s_top))
+	{
+		_tcscat(s_env, s_top);
+	}
+	SetEnvironmentVariable(_T("Path"), s_env);
+
+#ifdef _DEBUG
+	hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG); // 如果系统处于 DEBUG 模式下时，尝试导入 DEBUG 版本库
+#endif // _DEBUG
+	if (NULL == hDLL) // 如果不在 DEBUG 模式下或导入 DEBUG 版本库失败，则尝试导入 RELEASE 版本库
+	{
+		hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG);
+	}
+
+	_JZDLL_GetAPI(hDLL, szAPIExtName, ppAPI);
+	return hDLL;
 }
 
 template<class _Func, class _Pos>
