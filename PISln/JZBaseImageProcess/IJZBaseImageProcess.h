@@ -1,5 +1,5 @@
-#ifndef __IJZBASEIMAGEPROCESS_H__
-#define __IJZBASEIMAGEPROCESS_H__
+#ifndef __IJZ_BASEIMAGEPROCESS_H__
+#define __IJZ_BASEIMAGEPROCESS_H__
 
 #include <opencv2\opencv.hpp>
 using namespace std;

@@ -18,5 +18,8 @@
     <ClInclude Include="IJZBaseImageProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JZLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
