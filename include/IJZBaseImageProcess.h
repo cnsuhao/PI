@@ -3,8 +3,6 @@
 
 #include <Windows.h>
 #include <tchar.h>
-//#include <opencv2\opencv.hpp>
-//using namespace cv;
 #include <JZLoader.h>
 
 #define JZBASEIMAGEPROCESS_DLL_NAME			_T("JZBaseImageProcess")
@@ -27,21 +25,11 @@ class IJZBaseImageProcess
 public:
 	IJZBaseImageProcess();
 	~IJZBaseImageProcess();
-	virtual JZ_RESULT ProcessImage(/*Mat* src, Mat*  des, JZCommonParam* param*/) { return JZ_FAILED; }
-
+	virtual JZ_RESULT ProcessImage(void* psrc, void*  pdes, JZCommonParam* param) = 0;
+	JZ_RESULT ReadImage(const char* filename, void* pImage);
 private:
-	//Mat* pSrcImg;
-	//Mat* pDesImg;
 	JZCommonParam* pParam;
 };
-
-IJZBaseImageProcess::IJZBaseImageProcess()
-{
-}
-
-IJZBaseImageProcess::~IJZBaseImageProcess()
-{
-}
 
 typedef JZ_RESULT (*DefGetInterface)(IJZBaseImageProcess** ppAPI);
 typedef JZ_RESULT(*DefReleaseInterface)(IJZBaseImageProcess* pAPI);
