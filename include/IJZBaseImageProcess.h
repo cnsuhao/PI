@@ -3,9 +3,9 @@
 
 #include <Windows.h>
 #include <tchar.h>
-#include <opencv2\opencv.hpp>
-using namespace std;
-#include "JZLoader.h"
+//#include <opencv2\opencv.hpp>
+//using namespace cv;
+#include <JZLoader.h>
 
 #define JZBASEIMAGEPROCESS_DLL_NAME			_T("JZBaseImageProcess")
 #define JZBASEIMAGEPROCESS_API_EXT_NAME		"JZBIP_GetAPIStuPtr"
@@ -18,6 +18,7 @@ struct JZCommonParam
 enum JZ_RESULT
 {
 	JZ_OK,
+	JZ_FAILED,
 	JZ_INVAILD_PARAM,
 };
 
@@ -26,11 +27,11 @@ class IJZBaseImageProcess
 public:
 	IJZBaseImageProcess();
 	~IJZBaseImageProcess();
-	virtual JZ_RESULT ProcessImage(Mat* src, Mat*  des, JZCommonParam* param);
+	virtual JZ_RESULT ProcessImage(/*Mat* src, Mat*  des, JZCommonParam* param*/) { return JZ_FAILED; }
 
 private:
-	Mat* pSrcImg;
-	Mat* pDesImg;
+	//Mat* pSrcImg;
+	//Mat* pDesImg;
 	JZCommonParam* pParam;
 };
 
@@ -42,9 +43,12 @@ IJZBaseImageProcess::~IJZBaseImageProcess()
 {
 }
 
+typedef JZ_RESULT (*DefGetInterface)(IJZBaseImageProcess** ppAPI);
+typedef JZ_RESULT(*DefReleaseInterface)(IJZBaseImageProcess* pAPI);
 struct JZBaseImageProcessAPI
 {
-
+	DefGetInterface pfnGetInterface;
+	DefReleaseInterface pfnReleaseInterface;
 };
 
 // 加载器相对路径类

@@ -82,12 +82,12 @@ inline HMODULE JZDLL_Load(
 #endif // _DEBUG
 	if (NULL == hDLL) // 如果不在 DEBUG 模式下或导入 DEBUG 版本库失败，则尝试导入 RELEASE 版本库
 	{
-		hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG);
+		hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_RELEASE);
 	}
 
-	_JZDLL_GetAPI(hDLL, szAPIExtName, ppAPI);
 	if (NULL != hDLL) // 如果加载成功则直接返回，否则继续执行下面代码进行搜索
 	{
+		_JZDLL_GetAPI(hDLL, szAPIExtName, ppAPI);
 		return hDLL;
 	}
 
@@ -180,7 +180,8 @@ public:
 		}
 		else
 		{
-			_Moudle = JZDLL_Load(szDLLParentPath);
+			_Pos _Pval;
+			_Moudle = JZDLL_Load(_Pval.DLLName(), _Pval.APIExtName(), (void**)&_Fpval);
 			return _IsLoaded();
 		}	
 	}
@@ -204,7 +205,7 @@ public:
 
 private:
 	JZLoader(JZLoader<_Func, _Pos> const&) throw();
-	// JZLoader<_Func, _Pos>& operator=(JZLoader<_Func, _Pos> const&) throw();
+	JZLoader<_Func, _Pos>& operator=(JZLoader<_Func, _Pos> const&) throw();
 	bool _IsLoaded()
 	{
 		return (NULL != _Moudle);
