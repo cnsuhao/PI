@@ -1,4 +1,4 @@
-#include "IJZBaseImageProcess.h"
+#include "JZBaseImageProcess.h"
 
 #include <opencv2\opencv.hpp>
 using namespace cv;
@@ -8,18 +8,6 @@ using namespace cv;
 #else
 #	pragma comment(lib, "opencv_world320.lib")
 #endif // _DEBUG
-
-
-
-class JZBaseImageProcess: public IJZBaseImageProcess
-{
-public:
-	JZBaseImageProcess(){}
-	~JZBaseImageProcess(){}
-	JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  JZImageBuf, JZCommonParam* param);
-	JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage);
-
-};
 
 JZ_RESULT JZBaseImageProcess::WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param)
 {

@@ -13,6 +13,8 @@
 class IJZBaseImageProcess
 {
 public:
+	IJZBaseImageProcess() {}
+	~IJZBaseImageProcess() {}
 	virtual JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param) = 0;
 	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage) = 0;
 };

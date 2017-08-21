@@ -21,6 +21,13 @@
   <ItemGroup>
     <ClCompile Include="JZBaseImageProcess.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\IJZBaseImageProcess.h" />
+    <ClInclude Include="..\..\include\JZAutoLoader.h" />
+    <ClInclude Include="..\..\include\JZAutoSetEnv.h" />
+    <ClInclude Include="..\..\include\JZCommonImageDef.h" />
+    <ClInclude Include="JZBaseImageProcess.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{94A5222D-2642-4E25-85F3-F22F2074456F}</ProjectGuid>
     <RootNamespace>JZBaseImageProcess</RootNamespace>
