@@ -1,7 +1,8 @@
-#include "scene.h"
-
+#include "JZScene.h"
+#include "JZShader.h"
 Scene::Scene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 {
+	pShader = new JZShader();
 	downPoint = glm::vec2(0.0f, 0.0f);
 	upPoint = glm::vec2(0.0f, 0.0f);
 	memset(keys, 0, sizeof(bool)*1024);// 键盘按键的状态，true表示按下，false表示松开
@@ -17,6 +18,15 @@ Scene::Scene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 	modelMatrix = glm::mat4();
 	viewMatrix = camera.GetViewMatrix();
 	projectionMatrix = glm::mat4();
+}
+
+Scene::~Scene()
+{
+	if (NULL != pShader)
+	{
+		delete (JZShader*)pShader;
+		pShader = NULL;
+	}
 }
 
 /////////////////////////////1.初始化部分的函数///////////////////////////////////////
@@ -64,8 +74,9 @@ void Scene::Reset()
 void Scene::PrepareData()
 {
 	// 【1】shader
-	Shader shader0("../sys/shaders/coordSystem.vert", "../sys/shaders/coordSystem.frag");
-	shader.Program = shader0.Program;
+	const char* shaderPath[2] = { "../sys/shaders/coordSystem.vert", "../sys/shaders/coordSystem.frag" };
+	int iShaderNums = 2;
+	pShader->CreateShaderProgram(shaderPath, iShaderNums);
 
 	// 【2】顶点坐标、颜色、纹理坐标
 	//GLfloat vertices[] = 
@@ -271,23 +282,23 @@ void Scene::RenderScene()
 	_MouseControlModel();		// 鼠标控制模型旋转
 
 	// 向shader中传模型矩阵
-	shader.Use();// 启用shader
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	pShader.Use();// 启用shader
+	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	eRet = glGetError();
 	assert(0 == eRet);
 
 	// 向shader中传视图矩阵
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	eRet = glGetError();
 	assert(0 == eRet);
 
 	// 向shader中传投影矩阵
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	eRet = glGetError();
 	assert(0 == eRet);
 
 	/////////////////////////////往shader中传uniform变量////////////////////////////////
-	glUniform3fv(glGetUniformLocation(shader.Program, "pointColor"), 1, glm::value_ptr(pointColor));
+	glUniform3fv(glGetUniformLocation(pShader.Program, "pointColor"), 1, glm::value_ptr(pointColor));
 	eRet = glGetError();
 	assert(0 == eRet);
 

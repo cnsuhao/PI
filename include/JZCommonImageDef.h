@@ -1,18 +1,18 @@
 #ifndef __JZ_COMMONIMAGEDEF_H__
 #define __JZ_COMMONIMAGEDEF_H__
 
-// 图像处理的一些基本的公共参数
-struct JZCommonParam
-{
-
-};
-
 // 返回结果定义
 enum JZ_RESULT
 {
 	JZ_SUCCESS,
 	JZ_FAILED,
 	JZ_INVAILD_PARAM,
+};
+
+// 图像处理的一些基本的公共参数
+struct JZCommonParam
+{
+
 };
 
 // 像素格式，目前仅支持打包像素格式，分片像素格式以后扩展

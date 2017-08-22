@@ -28,27 +28,27 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,25 +71,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
-    <IncludePath>../../include/OpenGL;$(IncludePath)</IncludePath>
+    <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
-    <IncludePath>../../include/OpenGL;$(IncludePath)</IncludePath>
+    <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
-    <IncludePath>../../include/OpenGL;$(IncludePath)</IncludePath>
+    <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
-    <IncludePath>../../include/OpenGL;$(IncludePath)</IncludePath>
+    <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -145,14 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\IJZBaseRender.h" />
     <ClInclude Include="..\..\include\OpenGL\camera.h" />
-    <ClInclude Include="..\..\include\OpenGL\shader.h" />
-    <ClInclude Include="IJZBaseRender.h" />
-    <ClInclude Include="scene.h" />
+    <ClInclude Include="..\..\include\OpenGL\JZShader.h" />
+    <ClInclude Include="JZScene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\lib\Import_lib\OpenGL\shader.cpp" />
-    <ClCompile Include="scene.cpp" />
+    <ClCompile Include="..\..\lib\Import_lib\OpenGL\JZShader.cpp" />
+    <ClCompile Include="JZScene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

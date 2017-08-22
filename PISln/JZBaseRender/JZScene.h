@@ -3,13 +3,13 @@
 
 /////////////////头文件///////////////////////
 #include <vector>
-#include "GL/glew.h"
-#include "shader.h"
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <SOIL/SOIL.h>
+#include "IJZBaseRender.h"
 #include "camera.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "SOIL/SOIL.h"
 
 //////////////////库文件//////////////////////
 #pragma comment(lib, "glew32.lib")
@@ -35,7 +35,9 @@ public:
 	std::vector<Vertex> pointArray; // 存放用于绘制点的容器
 
 	/////////////////////////////【2】绘制部分用到的变量
-	Shader shader;					// OpenGL中的shader
+	const char** m_shaderPath;		// shader路径数组
+	int m_shaderNums;				// shader路径数组中包含了几个着色器,按照顶点着色器、片段着色器、几何着色器的顺序排列
+	IJZShader* pShader;				// OpenGL中的shader
 	GLuint texture1;				// OpenGL中的纹理
 	GLuint texture2;				// OpenGL中的纹理
 	GLuint VAO, VBO;				// OpenGL中VAO、VBO
@@ -55,7 +57,8 @@ public:
 	bool isCSModel;					// 是否是CS模式
 
 public:
-	Scene(); // 构造函数
+	Scene();	// 构造函数
+	~Scene();	// 析构函数
 
 	/////////////////////////////1.初始化部分的函数///////////////////////////////////////
 public:
