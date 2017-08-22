@@ -2,9 +2,7 @@
 #define __JZ_SHADER_H__
 #include <IJZBaseRender.h>
 #include <GL/glew.h> // 包含glew来获取所有的必须OpenGL头文件
-
-#pragma comment(lib, "glew32.lib")
-#pragma comment(lib, "opengl32.lib")
+#include <string>
 
 enum JZShaderType
 {
@@ -41,9 +39,9 @@ private:
 public:
 	// 程序ID
 	GLuint m_shaderProgram;
-	const GLchar* m_strVertex;		// 顶点着色器代码
-	const GLchar* m_strFragment;	// 片段着色器代码
-	const GLchar* m_strGeometry;	// 几何着色器代码
+	std::string m_strVertex;	// 顶点着色器代码
+	std::string m_strFragment;	// 片段着色器代码
+	std::string m_strGeometry;	// 几何着色器代码
 };
 
 #endif // !__JZ_SHADER_H__

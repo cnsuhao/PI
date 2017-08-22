@@ -24,7 +24,7 @@
     <ClInclude Include="..\..\include\OpenGL\JZShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JZScene.h">
+    <ClInclude Include="..\..\include\JZScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

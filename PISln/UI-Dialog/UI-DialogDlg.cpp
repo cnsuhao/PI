@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CUIDialogDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CUIDialogDlg::OnBnClickedButtonOpen)
 END_MESSAGE_MAP()
 
 
@@ -99,8 +100,18 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	HMODULE hDLL = LoadLibrary(_T("../../dll/x64/Debug/JZBaseRender.dll"));
+	typedef IJZScene* (*GetSceneAPI)();
+	GetSceneAPI pfn = (GetSceneAPI)GetProcAddress(hDLL, "GetSceneAPI");
+	m_pScene = pfn();
+	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
 
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+	m_pScene->SetHWnd(cwnd->m_hWnd);
+	m_pScene->InitOpenGL();
+	m_pScene->PrepareData();
+	m_pScene->PushDataToGPU();
+
+	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 void CUIDialogDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -141,7 +152,8 @@ void CUIDialogDlg::OnPaint()
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		//CDialogEx::OnPaint();
+		m_pScene->RenderScene();
 	}
 }
 
@@ -152,3 +164,9 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CUIDialogDlg::OnBnClickedButtonOpen()
+{
+	// TODO: Add your control notification handler code here
+}

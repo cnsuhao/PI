@@ -5,12 +5,31 @@
 #include <sstream>
 #include <cassert>
 
+#ifdef _DEBUG
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64d.lib")
+#		pragma comment(lib, "SOIL64s_d.lib")
+#	else
+#		pragma comment(lib, "glew32d.lib")
+#		pragma comment(lib, "SOIL32s_d.lib")
+#	endif
+#else
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64.lib")
+#		pragma comment(lib, "SOIL64s.lib")
+#	else
+#		pragma comment(lib, "glew32.lib")
+#		pragma comment(lib, "SOIL32s.lib")
+#	endif
+#endif // _DEBUG
+#pragma comment(lib, "opengl32.lib")
+
 JZShader::JZShader() 
 {
 	m_shaderProgram = 0;
-	m_strVertex = NULL;		// 顶点着色器代码
-	m_strFragment = NULL;	// 片段着色器代码
-	m_strGeometry = NULL;	// 几何着色器代码
+	m_strVertex = "";		// 顶点着色器代码
+	m_strFragment = "";	// 片段着色器代码
+	m_strGeometry = "";	// 几何着色器代码
 }
 
 JZShader::JZShader(const char** shaderPath, int iShaderNums)
@@ -127,13 +146,13 @@ void JZShader::_SetShaderCode(const char* shaderPath, JZShaderType shaderType)
 	switch (shaderType)
 	{
 	case JZ_SHADER_VERTEX:
-		m_strVertex = shaderCode.c_str();
+		m_strVertex = shaderCode;
 		break;
 	case JZ_SHADER_FRAGMENT:
-		m_strFragment = shaderCode.c_str();
+		m_strFragment = shaderCode;
 		break;
 	case JZ_SHADER_GEOMETRY:
-		m_strGeometry = shaderCode.c_str();
+		m_strGeometry = shaderCode;
 		break;
 	default:
 		break;
@@ -145,17 +164,18 @@ JZ_RESULT JZShader::_CompileShaderCode()
 	GLuint vertex, fragment, geometry;
 	GLint success;
 	GLchar infoLog[512];
-
-	if (NULL == m_strVertex || NULL == m_strFragment)
+	GLenum eRet;
+	if (m_strVertex.empty() || m_strFragment.empty())
 	{
 		return JZ_FAILED;
 	}
 
 	// 编译顶点着色器
-	if (NULL != m_strVertex)
+	if (!m_strVertex.empty())
 	{
 		vertex = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertex, 1, &m_strVertex, NULL);
+		const char* strVertex = m_strVertex.c_str();
+		glShaderSource(vertex, 1, &strVertex, NULL);
 		glCompileShader(vertex);
 		// 打印编译错误（如果有的话）
 		glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
@@ -166,12 +186,13 @@ JZ_RESULT JZShader::_CompileShaderCode()
 			return JZ_FAILED;
 		}
 	}
-	
+	eRet = glGetError(); assert(0 == eRet);
 	// 编译片段着色器
-	if (NULL != m_strFragment)
+	if (!m_strFragment.empty())
 	{
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &m_strFragment, NULL);
+		const char* strFragment = m_strFragment.c_str();
+		glShaderSource(fragment, 1, &strFragment, NULL);
 		glCompileShader(fragment);
 		// 打印编译错误（如果有的话）
 		glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
@@ -182,12 +203,13 @@ JZ_RESULT JZShader::_CompileShaderCode()
 			return JZ_FAILED;
 		}
 	}
-
+	eRet = glGetError(); assert(0 == eRet);
 	// 编译几何着色器
-	if (NULL != m_strGeometry)
+	if (!m_strGeometry.empty())
 	{
 		geometry = glCreateShader(GL_GEOMETRY_SHADER);
-		glShaderSource(geometry, 1, &m_strGeometry, NULL);
+		const char* strGeometry = m_strGeometry.c_str();
+		glShaderSource(geometry, 1, &strGeometry, NULL);
 		glCompileShader(geometry);
 		// 打印编译错误（如果有的话）
 		glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
@@ -198,12 +220,12 @@ JZ_RESULT JZShader::_CompileShaderCode()
 			return JZ_FAILED;
 		}
 	}
-
+	eRet = glGetError(); assert(0 == eRet);
 	// 创建和链接着色器程序
 	m_shaderProgram = glCreateProgram();
 	glAttachShader(m_shaderProgram, vertex);
 	glAttachShader(m_shaderProgram, fragment);
-	if (NULL != m_strGeometry)
+	if (!m_strGeometry.empty())
 	{
 		glAttachShader(m_shaderProgram, geometry);
 	}
@@ -215,11 +237,14 @@ JZ_RESULT JZShader::_CompileShaderCode()
 		glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 	}
-
+	eRet = glGetError(); assert(0 == eRet);
 	// 删除着色器，它们已经链接到我们的程序中了，已经不再需要了
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-	glDeleteShader(geometry);
-
+	if (!m_strGeometry.empty())
+	{
+		glDeleteShader(geometry);
+	}
+	eRet = glGetError(); assert(0 == eRet);
 	return JZ_SUCCESS;
 }

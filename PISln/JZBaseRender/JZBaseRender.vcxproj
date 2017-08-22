@@ -70,25 +70,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
-    <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
-    <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
-    <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
-    <IntDir>$(Configuration)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -97,6 +97,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
@@ -108,6 +109,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
@@ -121,6 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -136,6 +139,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -146,9 +150,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\IJZBaseRender.h" />
+    <ClInclude Include="..\..\include\JZScene.h" />
     <ClInclude Include="..\..\include\OpenGL\camera.h" />
     <ClInclude Include="..\..\include\OpenGL\JZShader.h" />
-    <ClInclude Include="JZScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Import_lib\OpenGL\JZShader.cpp" />

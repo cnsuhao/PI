@@ -10,19 +10,26 @@
 #include <SOIL/SOIL.h>
 #include "IJZBaseRender.h"
 #include "camera.h"
-
-//////////////////库文件//////////////////////
-#pragma comment(lib, "glew32.lib")
-#pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "SOIL.lib")
+#include <Windows.h>
 
 struct Vertex
 {
 	glm::vec3 position;
 	glm::vec3 color;
+	glm::vec2 texture;
 };
 
-class Scene
+class IJZScene
+{
+public:
+	virtual void SetHWnd(HWND cwnd) = 0;
+	virtual JZ_RESULT InitOpenGL() = 0;
+	virtual void PrepareData() = 0;
+	virtual void PushDataToGPU() = 0;
+	virtual void RenderScene() = 0;
+};
+
+class JZScene: public IJZScene
 {
 public:
 	/////////////////////////////【1】OpenGL初始化时用到的一些变量////////////////////////
@@ -38,8 +45,7 @@ public:
 	const char** m_shaderPath;		// shader路径数组
 	int m_shaderNums;				// shader路径数组中包含了几个着色器,按照顶点着色器、片段着色器、几何着色器的顺序排列
 	IJZShader* pShader;				// OpenGL中的shader
-	GLuint texture1;				// OpenGL中的纹理
-	GLuint texture2;				// OpenGL中的纹理
+	GLuint texture;					// OpenGL中的纹理
 	GLuint VAO, VBO;				// OpenGL中VAO、VBO
 	glm::mat4 modelMatrix;			// 模型矩阵
 	glm::mat4 viewMatrix;			// 观察矩阵
@@ -57,8 +63,8 @@ public:
 	bool isCSModel;					// 是否是CS模式
 
 public:
-	Scene();	// 构造函数
-	~Scene();	// 析构函数
+	JZScene();	// 构造函数
+	~JZScene();	// 析构函数
 
 	/////////////////////////////1.初始化部分的函数///////////////////////////////////////
 public:
@@ -69,7 +75,7 @@ public:
 	void Reset();														// 复位视角
 	void PrepareData();													// 准备绘制数据
 	void PushDataToGPU();												// 把数据从内存传到显存
-	bool InitOpenGL();													// 初始化OpenGL中内容
+	JZ_RESULT InitOpenGL();												// 初始化OpenGL中内容
 
 	/////////////////////////////2.绘制部分的函数////////////////////////////////////////
 	void AddPoint(Vertex point);										// 向绘制点容器中添加绘制点
@@ -82,8 +88,8 @@ public:
 	void SetUpPoint(glm::vec2 point);									// 设置鼠标左键松开时，鼠标所在点坐标
 	void SetKeyState(UINT nChar, bool state, bool resetAll = false);	// 设置键盘按键的状态
 	void SwitchViewModel();												// 在CS模式和非CS模式之间切换
-	void MouseControlView(CPoint currentPoint);							// 通过鼠标控制视角，输入参数currentPoint是鼠标在客户区域的相对位置
-	void MouseWheelControlProjection(short zDelta, CPoint point);		// 滚轮改变投影矩阵
+	void MouseControlView(POINT currentPoint);							// 通过鼠标控制视角，输入参数currentPoint是鼠标在客户区域的相对位置
+	void MouseWheelControlProjection(short zDelta, POINT point);		// 滚轮改变投影矩阵
 
 private:
 	void _UpdateViewAndProjectionMatrix();								// 更新变换矩阵

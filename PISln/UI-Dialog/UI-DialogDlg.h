@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include <JZScene.h>
 
 // CUIDialogDlg 对话框
 class CUIDialogDlg : public CDialogEx
@@ -24,11 +24,13 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
-
+	IJZScene* m_pScene;
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButtonOpen();
 };

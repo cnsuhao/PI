@@ -1,6 +1,26 @@
 #include "JZScene.h"
 #include "JZShader.h"
-Scene::Scene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
+
+#ifdef _DEBUG
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64d.lib")
+#		pragma comment(lib, "SOIL64s_d.lib")
+#	else
+#		pragma comment(lib, "glew32d.lib")
+#		pragma comment(lib, "SOIL32s_d.lib")
+#	endif
+#else
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64.lib")
+#		pragma comment(lib, "SOIL64s.lib")
+#	else
+#		pragma comment(lib, "glew32.lib")
+#		pragma comment(lib, "SOIL32s.lib")
+#	endif
+#endif // _DEBUG
+#pragma comment(lib, "opengl32.lib")
+
+JZScene::JZScene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 {
 	pShader = new JZShader();
 	downPoint = glm::vec2(0.0f, 0.0f);
@@ -20,7 +40,7 @@ Scene::Scene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 	projectionMatrix = glm::mat4();
 }
 
-Scene::~Scene()
+JZScene::~JZScene()
 {
 	if (NULL != pShader)
 	{
@@ -30,7 +50,7 @@ Scene::~Scene()
 }
 
 /////////////////////////////1.初始化部分的函数///////////////////////////////////////
-void Scene::SetHWnd(HWND cwnd)
+void JZScene::SetHWnd(HWND cwnd)
 {
 	m_hwnd = cwnd;
 
@@ -38,26 +58,26 @@ void Scene::SetHWnd(HWND cwnd)
 	_UpdateViewAndProjectionMatrix();
 }
 
-void Scene::SetGroundColor(glm::vec4 color)
+void JZScene::SetGroundColor(glm::vec4 color)
 {
 	groundColor = color;
 }
 
-void Scene::SetPointColor(glm::vec3 color)
+void JZScene::SetPointColor(glm::vec3 color)
 {
 	pointColor = color;
 }
 
-void Scene::InitMatrix()
+void JZScene::InitMatrix()
 {
 	modelMatrix = glm::mat4();
 	viewMatrix = glm::mat4();
 	projectionMatrix = glm::mat4();
 }
 
-void Scene::Reset()
+void JZScene::Reset()
 {
-	camera.Reset();
+	//camera.Reset();
 	downPoint = glm::vec2(0.0f, 0.0f);
 	upPoint = glm::vec2(0.0f, 0.0f);
 	memset(keys, 0, sizeof(bool)*1024);// 键盘按键的状态，true表示按下，false表示松开
@@ -71,116 +91,107 @@ void Scene::Reset()
 	modelMatrix = glm::mat4();
 }
 
-void Scene::PrepareData()
+void JZScene::PrepareData()
 {
 	// 【1】shader
-	const char* shaderPath[2] = { "../sys/shaders/coordSystem.vert", "../sys/shaders/coordSystem.frag" };
+	const char* shaderPath[2] = { "../../sys/shaders/texture.vert", "../../sys/shaders/texture.frag" };
 	int iShaderNums = 2;
 	pShader->CreateShaderProgram(shaderPath, iShaderNums);
 
 	// 【2】顶点坐标、颜色、纹理坐标
-	//GLfloat vertices[] = 
-	//{
-	//	//-----位置-----		---纹理坐标---
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
-	//	1.0f, -1.0f, -1.0f,  1.0f, 0.0f,
-	//	1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-	//	1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-	//	-1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+	GLfloat vertices[] = 
+	{
+		//-----位置-----		---纹理坐标---
+		-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+		1.0f, -1.0f, -1.0f,  1.0f, 0.0f,
+		1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+		1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+		-1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+	};
 
-	//	-1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
-	//	1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
-	//	1.0f,  1.0f,  1.0f,  1.0f, 1.0f,
-	//	1.0f,  1.0f,  1.0f,  1.0f, 1.0f,
-	//	-1.0f,  1.0f,  1.0f,  0.0f, 1.0f,
-	//	-1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
-
-	//	-1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-	//	-1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-	//	-1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
-	//	-1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-
-	//	1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-	//	1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-	//	1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-	//	1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-	//	1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
-	//	1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-	//	1.0f, -1.0f, -1.0f,  1.0f, 1.0f,
-	//	1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
-	//	1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
-	//	-1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
-	//	-1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
-
-	//	-1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
-	//	1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-	//	1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-	//	1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
-	//	-1.0f,  1.0f,  1.0f,  0.0f, 0.0f,
-	//	-1.0f,  1.0f, -1.0f,  0.0f, 1.0f
-	//};
-
-	//for (int i = 0; i < 36; i++)
-	//{
-	//	Vertex vertex;
-	//	vertex.position.x = vertices[i*5 + 0];
-	//	vertex.position.y = vertices[i*5 + 1];
-	//	vertex.position.z = vertices[i*5 + 2];
-	//	vertex.color.r = 1.0f;
-	//	vertex.color.g = 1.0f;
-	//	vertex.color.b = 1.0f;
-	//	AddPoint(vertex);
-	//}
-
-	//Vertex largePoint;
-	//largePoint.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	//largePoint.color = glm::vec3(1.0f, 1.0f, 1.0f);
-	//AddPoint(largePoint);
+	for (int i = 0; i < 6; i++)
+	{
+		Vertex vertex;
+		vertex.position.x = vertices[i*5 + 0];
+		vertex.position.y = vertices[i*5 + 1];
+		vertex.position.z = vertices[i*5 + 2];
+		vertex.color.r = 1.0f;
+		vertex.color.g = 1.0f;
+		vertex.color.b = 1.0f;
+		vertex.texture.x = vertices[i*5 + 3];
+		vertex.texture.y = vertices[i*5 + 4];
+		AddPoint(vertex);
+	}
 }
 
-void Scene::PushDataToGPU()
+void JZScene::PushDataToGPU()
 {
 
-	GLfloat* vertices2 = new GLfloat[pointArray.size()*6];
+	GLfloat* vertices2 = new GLfloat[pointArray.size()*8];
 	for (unsigned int i = 0; i < pointArray.size(); i++)
 	{
-		vertices2[i*6 + 0] = pointArray[i].position.x;
-		vertices2[i*6 + 1] = pointArray[i].position.y;
-		vertices2[i*6 + 2] = pointArray[i].position.z;
-		vertices2[i*6 + 3] = pointArray[i].color.r;
-		vertices2[i*6 + 4] = pointArray[i].color.g;
-		vertices2[i*6 + 5] = pointArray[i].color.b;
+		vertices2[i*8 + 0] = pointArray[i].position.x;
+		vertices2[i*8 + 1] = pointArray[i].position.y;
+		vertices2[i*8 + 2] = pointArray[i].position.z;
+		vertices2[i*8 + 3] = pointArray[i].color.r;
+		vertices2[i*8 + 4] = pointArray[i].color.g;
+		vertices2[i*8 + 5] = pointArray[i].color.b;
+		vertices2[i*8 + 4] = pointArray[i].texture.x;
+		vertices2[i*8 + 5] = pointArray[i].texture.y;
 	}
+
+	GLint texWidth;
+	GLint texHeight;
+	GLubyte* image1 = SOIL_load_image("../../sys/images/test.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 
 	GLenum eRet = 0;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	eRet = glGetError();
+	assert(0 == eRet);
+
 	// 往显存中存数据
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, pointArray.size()*6*sizeof(GLfloat), vertices2, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, pointArray.size()*8*sizeof(GLfloat), vertices2, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), NULL);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (const void*)(3*sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(3*sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(6*sizeof(GLfloat)));
 	glBindVertexArray(0);
 	eRet = glGetError();
 	assert(0 == eRet);
 
-	delete[] vertices2;
+	// 往显存中传纹理
+	pShader->Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(glGetUniformLocation(pShader->GetProgramID(), "fTexture"), 0);
+	eRet = glGetError();
+	assert(0 == eRet);
 
+	delete[] vertices2;
+	SOIL_free_image_data(image1);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	eRet = glGetError();
 	assert(0 == eRet);
 }
 
-bool Scene::InitOpenGL()
+JZ_RESULT JZScene::InitOpenGL()
 {
 	GLenum eRet = 0;	
 	static PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),  
@@ -207,19 +218,19 @@ bool Scene::InitOpenGL()
 	m_hDC = ::GetDC(m_hwnd);  
 	if (!(pixelformat = ChoosePixelFormat(m_hDC , &pfd)))  
 	{   
-		return false;  
+		return JZ_FAILED;  
 	}  
 	if (!SetPixelFormat(m_hDC , pixelformat , &pfd))  
 	{   
-		return false;  
+		return JZ_FAILED;
 	}  
 	if (!(m_hRC = wglCreateContext(m_hDC)))  
 	{  
-		return false;  
+		return JZ_FAILED;
 	}  
 	if (!wglMakeCurrent(m_hDC , m_hRC))  
 	{  
-		return false;  
+		return JZ_FAILED;
 	}     
 
 	glewExperimental = GL_TRUE;
@@ -227,18 +238,20 @@ bool Scene::InitOpenGL()
 	eRet = glGetError();
 	assert(0 == eRet);  
 
-	CRect rect; //在这个矩形中画图  
-	GetClientRect(m_hwnd, rect);
-	//绘制区域占据整个窗口大小  
-	glViewport(0 , 0 , rect.Width() , rect.Height());
+	RECT rect; //在这个矩形中画图  
+	GetClientRect(m_hwnd, &rect);
+	//绘制区域占据整个窗口大小 
+	GLsizei width = rect.right - rect.left;
+	GLsizei height = rect.bottom - rect.top;
+	glViewport(0 , 0 , width, height);
 	eRet = glGetError();
 	assert(0 == eRet);  
 
-	return true;
+	return JZ_SUCCESS;
 }
 
 /////////////////////////////2.绘制部分的函数////////////////////////////////////////
-void Scene::AddPoint(Vertex point)// 添加点
+void JZScene::AddPoint(Vertex point)// 添加点
 {
 	/*std::vector<Vertex>::iterator it;
 	for (it = pointArray.begin(); it < pointArray.end(); it++)
@@ -252,12 +265,12 @@ void Scene::AddPoint(Vertex point)// 添加点
 		pointArray.push_back(point);
 	//}
 }
-void Scene::DeletePoint(glm::vec3 point)// 删除点
+void JZScene::DeletePoint(glm::vec3 point)// 删除点
 {
 
 }
 
-void Scene::RenderScene()
+void JZScene::RenderScene()
 {
 	GLenum eRet = 0;
 	//////////////////////////////////////////////////////////////////////
@@ -276,31 +289,31 @@ void Scene::RenderScene()
 	assert(0 == eRet);
 
 
-	//////////////////////////// 往shader中传模型、视图、投影矩阵//////////////////////////////
-	// 控制模型、视图和投影矩阵
-	_KeyControlCameraAndModel();	// 键盘控制视角，也就是改变视图、投影矩阵
-	_MouseControlModel();		// 鼠标控制模型旋转
+	////////////////////////////// 往shader中传模型、视图、投影矩阵//////////////////////////////
+	//// 控制模型、视图和投影矩阵
+	//_KeyControlCameraAndModel();	// 键盘控制视角，也就是改变视图、投影矩阵
+	//_MouseControlModel();		// 鼠标控制模型旋转
 
-	// 向shader中传模型矩阵
-	pShader.Use();// 启用shader
-	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-	eRet = glGetError();
-	assert(0 == eRet);
+	//// 向shader中传模型矩阵
+	//pShader->Use();// 启用shader
+	//glUniformMatrix4fv(glGetUniformLocation(pShader->GetProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	//eRet = glGetError();
+	//assert(0 == eRet);
 
-	// 向shader中传视图矩阵
-	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	eRet = glGetError();
-	assert(0 == eRet);
+	//// 向shader中传视图矩阵
+	//glUniformMatrix4fv(glGetUniformLocation(pShader->GetProgramID(), "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	//eRet = glGetError();
+	//assert(0 == eRet);
 
-	// 向shader中传投影矩阵
-	glUniformMatrix4fv(glGetUniformLocation(pShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	eRet = glGetError();
-	assert(0 == eRet);
+	//// 向shader中传投影矩阵
+	//glUniformMatrix4fv(glGetUniformLocation(pShader->GetProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	//eRet = glGetError();
+	//assert(0 == eRet);
 
-	/////////////////////////////往shader中传uniform变量////////////////////////////////
-	glUniform3fv(glGetUniformLocation(pShader.Program, "pointColor"), 1, glm::value_ptr(pointColor));
-	eRet = glGetError();
-	assert(0 == eRet);
+	///////////////////////////////往shader中传uniform变量////////////////////////////////
+	//glUniform3fv(glGetUniformLocation(pShader->GetProgramID(), "pointColor"), 1, glm::value_ptr(pointColor));
+	//eRet = glGetError();
+	//assert(0 == eRet);
 
 	////////////////////////////////////绘制图形////////////////////////////////////////
 	glBindVertexArray(VAO);
@@ -318,7 +331,7 @@ void Scene::RenderScene()
 }
 
 /////////////////////////////3.响应鼠标和按键部分的函数///////////////////////////////////
-void Scene::SetDownPoint(glm::vec2 point)// 设置鼠标左键按下时，鼠标所在点坐标
+void JZScene::SetDownPoint(glm::vec2 point)// 设置鼠标左键按下时，鼠标所在点坐标
 {
 	if (!isCSModel && _IsCursorInRect())
 	{
@@ -327,7 +340,7 @@ void Scene::SetDownPoint(glm::vec2 point)// 设置鼠标左键按下时，鼠标所在点坐标
 	}
 }
 
-void Scene::SetUpPoint(glm::vec2 point)// 设置鼠标左键松开时，鼠标所在点坐标
+void JZScene::SetUpPoint(glm::vec2 point)// 设置鼠标左键松开时，鼠标所在点坐标
 {
 	if (!isCSModel && _IsCursorInRect())
 	{
@@ -335,7 +348,7 @@ void Scene::SetUpPoint(glm::vec2 point)// 设置鼠标左键松开时，鼠标所在点坐标
 	}
 }
 
-void Scene::SetKeyState(UINT nChar, bool state, bool resetAll/*= false*/)// 设置键盘按键的状态
+void JZScene::SetKeyState(UINT nChar, bool state, bool resetAll/*= false*/)// 设置键盘按键的状态
 {
 	if (_IsCursorInRect())
 	{
@@ -346,9 +359,9 @@ void Scene::SetKeyState(UINT nChar, bool state, bool resetAll/*= false*/)// 设置
 
 }
 
-void Scene::SwitchViewModel()
+void JZScene::SwitchViewModel()
 {
-	if (_IsCursorInRect())
+	/*if (_IsCursorInRect())
 	{
 		if (isCSModel)
 		{
@@ -366,64 +379,64 @@ void Scene::SwitchViewModel()
 			ShowCursor(false);
 			ClipCursor(rect);
 		}
-	}
+	}*/
 }
 
 // 输入参数currentPoint是鼠标在客户区域的相对位置
-void Scene::MouseControlView(CPoint currentPoint)
+void JZScene::MouseControlView(POINT currentPoint)
 {
 	
-	if (isCSModel && _IsCursorInRect())
-	{
-		CRect rect;
-		::GetClientRect(m_hwnd, rect);
-		if (firstCursor)
-		{
-			lastFramePoint.x = (float)rect.CenterPoint().x;
-			lastFramePoint.y = (float)rect.CenterPoint().y;
-			firstCursor = false;
-		}
+	//if (isCSModel && _IsCursorInRect())
+	//{
+	//	CRect rect;
+	//	::GetClientRect(m_hwnd, rect);
+	//	if (firstCursor)
+	//	{
+	//		lastFramePoint.x = (float)rect.CenterPoint().x;
+	//		lastFramePoint.y = (float)rect.CenterPoint().y;
+	//		firstCursor = false;
+	//	}
 
-		GLfloat xoffset = currentPoint.x - lastFramePoint.x;
-		GLfloat yoffset = lastFramePoint.y - currentPoint.y;// 注意这里是相反的，因为y坐标的范围是从下往上的
-		lastFramePoint.x = (GLfloat)currentPoint.x;
-		lastFramePoint.y = (GLfloat)currentPoint.y;
+	//	GLfloat xoffset = currentPoint.x - lastFramePoint.x;
+	//	GLfloat yoffset = lastFramePoint.y - currentPoint.y;// 注意这里是相反的，因为y坐标的范围是从下往上的
+	//	lastFramePoint.x = (GLfloat)currentPoint.x;
+	//	lastFramePoint.y = (GLfloat)currentPoint.y;
 
-		GLfloat sensitivity = 0.2f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
+	//	GLfloat sensitivity = 0.2f;
+	//	xoffset *= sensitivity;
+	//	yoffset *= sensitivity;
 
-		/*CPoint point;
-		GetCursorPos(&point);
-		CRect rrect;
-		::GetWindowRect(m_hwnd, rrect);
-		if (point.x <= (rrect.TopLeft().x + 1))
-		{
-		float velocity = 3.0f * 0.2f;
-		xoffset = -velocity;
-		}*/
-		
-		camera.Yaw += xoffset;
-		camera.Pitch += yoffset;// 因为往上移动，yoffset为负值，而俯仰角应该增大
-		if (camera.Pitch > 89.0f)
-			camera.Pitch = 89.0f;
-		if (camera.Pitch < -89.0f)
-			camera.Pitch = -89.0f;
+	//	/*CPoint point;
+	//	GetCursorPos(&point);
+	//	CRect rrect;
+	//	::GetWindowRect(m_hwnd, rrect);
+	//	if (point.x <= (rrect.TopLeft().x + 1))
+	//	{
+	//	float velocity = 3.0f * 0.2f;
+	//	xoffset = -velocity;
+	//	}*/
+	//	
+	//	camera.Yaw += xoffset;
+	//	camera.Pitch += yoffset;// 因为往上移动，yoffset为负值，而俯仰角应该增大
+	//	if (camera.Pitch > 89.0f)
+	//		camera.Pitch = 89.0f;
+	//	if (camera.Pitch < -89.0f)
+	//		camera.Pitch = -89.0f;
 
-		glm::vec3 front;
-		front.x = cos(glm::radians(camera.Pitch)) * cos(glm::radians(camera.Yaw));
-		front.y = sin(glm::radians(camera.Pitch));
-		front.z = cos(glm::radians(camera.Pitch)) * sin(glm::radians(camera.Yaw));
-		camera.Front = glm::normalize(front);
+	//	glm::vec3 front;
+	//	front.x = cos(glm::radians(camera.Pitch)) * cos(glm::radians(camera.Yaw));
+	//	front.y = sin(glm::radians(camera.Pitch));
+	//	front.z = cos(glm::radians(camera.Pitch)) * sin(glm::radians(camera.Yaw));
+	//	camera.Front = glm::normalize(front);
 
-		_UpdateViewAndProjectionMatrix();
-	}
+	//	_UpdateViewAndProjectionMatrix();
+	//}
 }
 
-void Scene::MouseWheelControlProjection(short zDelta, CPoint point)
+void JZScene::MouseWheelControlProjection(short zDelta, POINT point)
 {
 
-	if (_IsCursorInRect())
+	/*if (_IsCursorInRect())
 	{
 		camera.ProcessMouseScroll((float)zDelta/WHEEL_DELTA);
 	}
@@ -438,30 +451,31 @@ void Scene::MouseWheelControlProjection(short zDelta, CPoint point)
 		float x = (point.x - centerPoint.x) / (float)(rect.Width()/2);
 		float y = (centerPoint.y - point.y) / (float)(rect.Height()/2);
 		float z = 0;
-	}
+	}*/
 }
 
-void Scene::_UpdateViewAndProjectionMatrix()
+void JZScene::_UpdateViewAndProjectionMatrix()
 {
-	// 更新视图矩阵
-	viewMatrix = camera.GetViewMatrix();
+	//// 更新视图矩阵
+	//viewMatrix = camera.GetViewMatrix();
 
-	// 更新投影矩阵
-	CRect rect;
-	GetClientRect(m_hwnd, rect);
-	projectionMatrix = glm::perspective(glm::radians(camera.Zoom), (GLfloat)rect.Width()/(GLfloat)rect.Height(), 0.1f, 100.0f);
+	//// 更新投影矩阵
+	//CRect rect;
+	//GetClientRect(m_hwnd, rect);
+	//projectionMatrix = glm::perspective(glm::radians(camera.Zoom), (GLfloat)rect.Width()/(GLfloat)rect.Height(), 0.1f, 100.0f);
 }
 
-bool Scene::_IsCursorInRect()
+bool JZScene::_IsCursorInRect()
 {
-	CPoint point;
+	/*CPoint point;
 	CRect rect;
 	GetCursorPos(&point);
 	::GetWindowRect(m_hwnd, rect);
-	return rect.PtInRect(point);
+	return rect.PtInRect(point);*/
+	return true;
 }
 
-void Scene::_KeyControlCameraAndModel()// 按住W、A、S、D时，相机视角进行相应改变
+void JZScene::_KeyControlCameraAndModel()// 按住W、A、S、D时，相机视角进行相应改变
 {
 	if (isCSModel)
 	{
@@ -497,7 +511,7 @@ void Scene::_KeyControlCameraAndModel()// 按住W、A、S、D时，相机视角进行相应改变
 	}
 }
 
-void Scene::_MouseControlModel()
+void JZScene::_MouseControlModel()
 {
 	if (_IsCursorInRect())
 	{
@@ -514,7 +528,7 @@ void Scene::_MouseControlModel()
 }
 
 ////////////////////////////4.释放内存部分的函数///////////////////////////////////
-void Scene::DestroyOpenGL()
+void JZScene::DestroyOpenGL()
 {
 	m_hRC = ::wglGetCurrentContext();  
 
@@ -528,4 +542,10 @@ void Scene::DestroyOpenGL()
 		delete m_hDC;  
 	}  
 	m_hDC = NULL;  
+}
+
+extern "C" _declspec(dllexport) IJZScene* GetSceneAPI()
+{
+	static JZScene scene;
+	return &scene;
 }
