@@ -19,24 +19,12 @@ struct Vertex
 	glm::vec2 texture;
 };
 
-class IJZScene
-{
-public:
-	virtual void SetHWnd(HWND cwnd) = 0;
-	virtual JZ_RESULT InitOpenGL() = 0;
-	virtual void PrepareData() = 0;
-	virtual void PushDataToGPU() = 0;
-	virtual void RenderScene() = 0;
-};
-
 class JZScene: public IJZScene
 {
 public:
 	/////////////////////////////【1】OpenGL初始化时用到的一些变量////////////////////////
 	Camera camera;					// 相机参数
 	HWND m_hwnd;					// MFC中控件的句柄，可用函数GetDlgItem()获取
-	HDC m_hDC;						// 根据窗口或控件得到的设备上下文，用于图形绘制
-	HGLRC m_hRC;					// OpenGL渲染所需要的设备 
 	glm::vec4 groundColor;			// 显示区域背景颜色RGBA
 	glm::vec3 pointColor;			// 绘制点的颜色RGB
 	std::vector<Vertex> pointArray; // 存放用于绘制点的容器
@@ -44,9 +32,11 @@ public:
 	/////////////////////////////【2】绘制部分用到的变量
 	const char** m_shaderPath;		// shader路径数组
 	int m_shaderNums;				// shader路径数组中包含了几个着色器,按照顶点着色器、片段着色器、几何着色器的顺序排列
-	IJZShader* pShader;				// OpenGL中的shader
-	GLuint texture;					// OpenGL中的纹理
-	GLuint VAO, VBO, EBO;			// OpenGL中VAO、VBO
+	IJZShader* m_pShader;			// OpenGL中的shader资源
+	IJZTexture* m_pTexture;			// OpenGL中的纹理资源
+	IJZDevice* m_pDevice;			// OpenGL设备资源
+
+	GLuint m_VAO, m_VBO, m_EBO;		// OpenGL中VAO、VBO
 	glm::mat4 modelMatrix;			// 模型矩阵
 	glm::mat4 viewMatrix;			// 观察矩阵
 	glm::mat4 projectionMatrix;		// 投影矩阵

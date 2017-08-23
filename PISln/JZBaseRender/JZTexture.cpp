@@ -1,5 +1,6 @@
 #include <cassert>
 #include "JZTexture.h"
+#include <GL/glew.h> // 包含glew来获取所有的必须OpenGL头文件
 
 JZTexture::JZTexture()
 {
@@ -10,9 +11,15 @@ JZTexture::JZTexture()
 
 JZTexture::~JZTexture()
 {
+	Release();
 }
 
-JZ_RESULT JZTexture::Create(GLsizei width, GLsizei height)
+JZResType JZTexture::GetResType()
+{
+	return JZ_RES_TEX;
+}
+
+JZ_RESULT JZTexture::Create(int width, int height, JZImageBuf* pImageBuf)
 {
 	if (0 == m_texID) // 需要创建纹理
 	{
@@ -25,7 +32,15 @@ JZ_RESULT JZTexture::Create(GLsizei width, GLsizei height)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, m_texID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		if (NULL != pImageBuf && NULL != pImageBuf->color)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageBuf->color);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		}
+		
 		glBindTexture(GL_TEXTURE_2D, 0);
 		GLenum eRet = glGetError();
 		assert(0 == eRet);
@@ -69,34 +84,16 @@ JZ_RESULT JZTexture::FillImage(JZImageBuf* pImageBuf)
 	}
 }
 
-GLuint JZTexture::GetTexID()
+unsigned int JZTexture::GetTexID()
 {
 	return m_texID;
 }
 
-GLsizei JZTexture::GetTexWidth() // 获取纹理宽度
+int JZTexture::GetTexWidth() // 获取纹理宽度
 {
 	return m_texWidth;
 }
-GLsizei JZTexture::GetTexHeight()// 获取纹理高度
+int JZTexture::GetTexHeight()// 获取纹理高度
 {
 	return m_texHeight;
-}
-
-JZTexManager::JZTexManager()
-{
-}
-
-JZTexManager::~JZTexManager()
-{
-}
-
-JZTexture* JZTexManager::CreateTexture()
-{
-
-}
-
-JZ_RESULT JZTexManager::ReleaseTexture(JZTexture* pTexture)
-{
-
 }

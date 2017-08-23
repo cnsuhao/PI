@@ -19,16 +19,19 @@ public:
 	// 构造器读取并构建着色器
 	JZShader();
 	JZShader(const char** shaderPath, int iShaderNums);
+	~JZShader();
 	// 获取资源类型
-	JZResType GetResType();
+	virtual JZResType GetResType();
 	// 使用着色器程序
-	void Use();
+	virtual void Use();
+	// 解除使用着色器程序
+	virtual void UnUse();
 	// shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、几何着色器的顺序排列
-	JZ_RESULT CreateShaderProgram(const char** shaderPath, int iShaderNums);
+	virtual JZ_RESULT CreateShaderProgram(const char** shaderPath, int iShaderNums);
 	// 获取着色器程序ID
-	unsigned int GetProgramID();
+	virtual unsigned int GetProgramID();
 	// 释放着色器程序
-	void Delete();
+	virtual void Release();
 
 private:
 	// 根据shader路径，读取shader代码，并设置给对应的成员变量

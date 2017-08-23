@@ -150,13 +150,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\IJZBaseRender.h" />
-    <ClInclude Include="..\..\include\JZScene.h" />
     <ClInclude Include="..\..\include\OpenGL\camera.h" />
-    <ClInclude Include="..\..\include\OpenGL\JZShader.h" />
+    <ClInclude Include="JZDevice.h" />
+    <ClInclude Include="JZScene.h" />
+    <ClInclude Include="JZShader.h" />
+    <ClInclude Include="JZTexture.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\lib\Import_lib\OpenGL\JZShader.cpp" />
+    <ClCompile Include="JZDevice.cpp" />
     <ClCompile Include="JZScene.cpp" />
+    <ClCompile Include="JZShader.cpp" />
+    <ClCompile Include="JZTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sys\shaders\texture.frag" />

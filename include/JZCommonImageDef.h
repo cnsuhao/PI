@@ -18,6 +18,8 @@ struct JZCommonParam
 // 像素格式，目前仅支持打包像素格式，分片像素格式以后扩展
 enum JZ_PIXEL_FMT
 {
+	JZ_PIXFMT_BGR,
+	JZ_PIXFMT_RGB,
 	JZ_PIXFMT_BGRA,
 	JZ_PIXFMT_RGBA,
 	JZ_PIXFMT_YUVA,

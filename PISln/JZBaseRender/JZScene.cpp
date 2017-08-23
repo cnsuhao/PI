@@ -1,5 +1,7 @@
 #include "JZScene.h"
 #include "JZShader.h"
+#include "JZTexture.h"
+#include "JZDevice.h"
 
 #ifdef _DEBUG
 #	ifdef _WIN64
@@ -22,7 +24,9 @@
 
 JZScene::JZScene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 {
-	pShader = new JZShader();
+	m_pShader = new JZShader();
+	m_pTexture = new JZTexture();
+	m_pDevice = new JZDevice();
 	downPoint = glm::vec2(0.0f, 0.0f);
 	upPoint = glm::vec2(0.0f, 0.0f);
 	memset(keys, 0, sizeof(bool)*1024);// 键盘按键的状态，true表示按下，false表示松开
@@ -42,10 +46,10 @@ JZScene::JZScene():camera(glm::vec3(0.0f, 0.0f, 5.0f))
 
 JZScene::~JZScene()
 {
-	if (NULL != pShader)
+	if (NULL != m_pShader)
 	{
-		delete (JZShader*)pShader;
-		pShader = NULL;
+		delete (JZShader*)m_pShader;
+		m_pShader = NULL;
 	}
 }
 
@@ -96,7 +100,7 @@ void JZScene::PrepareData()
 	// 【1】shader
 	const char* shaderPath[2] = { "../../sys/shaders/texture.vert", "../../sys/shaders/texture.frag" };
 	int iShaderNums = 2;
-	pShader->CreateShaderProgram(shaderPath, iShaderNums);
+	m_pShader->CreateShaderProgram(shaderPath, iShaderNums);
 
 	// 【2】顶点坐标、颜色、纹理坐标
 	GLfloat vertices[] = 
@@ -121,6 +125,18 @@ void JZScene::PrepareData()
 		vertex.texture.y = vertices[i * 8 + 7];
 		AddPoint(vertex);
 	}
+
+	// 【3】纹理资源
+	int texWidth = 0;
+	int texHeight = 0;
+	unsigned char* image = SOIL_load_image("../../sys/images/awesomeface.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+	JZImageBuf imageBuf = { 0 };
+	imageBuf.color = image;
+	imageBuf.pitch = texWidth * 3;
+	imageBuf.pixel_fmt = JZ_PIXFMT_RGB;
+	m_pTexture->Create(texWidth, texHeight);
+	m_pTexture->FillImage(&imageBuf);
+	SOIL_free_image_data(image);
 }
 
 void JZScene::PushDataToGPU()
@@ -145,31 +161,14 @@ void JZScene::PushDataToGPU()
 		1,2,3
 	};
 
-	GLint texWidth;
-	GLint texHeight;
-	GLubyte* image = SOIL_load_image("../../sys/images/awesomeface.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
-
 	GLenum eRet = 0;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	eRet = glGetError();
-	assert(0 == eRet);
+	glGenVertexArrays(1, &m_VAO);
+	glGenBuffers(1, &m_VBO);
+	glGenBuffers(1, &m_EBO);
 
 	// 往显存中存数据
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindVertexArray(m_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, pointArray.size()*8*sizeof(GLfloat), vertices2, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
@@ -178,23 +177,23 @@ void JZScene::PushDataToGPU()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(6*sizeof(GLfloat)));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(verticesIndex), verticesIndex, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 	eRet = glGetError();
 	assert(0 == eRet);
 
-	// 往显存中传纹理
-	pShader->Use();
+	// 往shader中传纹理
+	m_pShader->Use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(glGetUniformLocation(pShader->GetProgramID(), "fTexture"), 0);
+	glBindTexture(GL_TEXTURE_2D, m_pTexture->GetTexID());
+	glUniform1i(glGetUniformLocation(m_pShader->GetProgramID(), "fTexture"), 0);
 	eRet = glGetError();
 	assert(0 == eRet);
 
 	delete[] vertices2;
-	SOIL_free_image_data(image);
+	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	eRet = glGetError();
 	assert(0 == eRet);
@@ -202,50 +201,7 @@ void JZScene::PushDataToGPU()
 
 JZ_RESULT JZScene::InitOpenGL()
 {
-	GLenum eRet = 0;	
-	static PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),  
-		1,  
-		PFD_DRAW_TO_WINDOW |  
-		PFD_SUPPORT_OPENGL |  
-		PFD_DOUBLEBUFFER,  
-		PFD_TYPE_RGBA,  
-		24 ,  
-		0, 0, 0, 0, 0, 0,  
-		0,  
-		0,  
-		0,  
-		0, 0, 0, 0,  
-		32 ,  
-		0,  
-		0,  
-		PFD_MAIN_PLANE,  
-		0,  
-		0, 0, 0  
-	};  
-	int pixelformat;
-
-	m_hDC = ::GetDC(m_hwnd);  
-	if (!(pixelformat = ChoosePixelFormat(m_hDC , &pfd)))  
-	{   
-		return JZ_FAILED;  
-	}  
-	if (!SetPixelFormat(m_hDC , pixelformat , &pfd))  
-	{   
-		return JZ_FAILED;
-	}  
-	if (!(m_hRC = wglCreateContext(m_hDC)))  
-	{  
-		return JZ_FAILED;
-	}  
-	if (!wglMakeCurrent(m_hDC , m_hRC))  
-	{  
-		return JZ_FAILED;
-	}     
-
-	glewExperimental = GL_TRUE;
-	glewInit();
-	eRet = glGetError();
-	assert(0 == eRet);  
+	m_pDevice->CreateDevice(m_hwnd);
 
 	RECT rect; //在这个矩形中画图  
 	GetClientRect(m_hwnd, &rect);
@@ -253,7 +209,7 @@ JZ_RESULT JZScene::InitOpenGL()
 	GLsizei width = rect.right - rect.left;
 	GLsizei height = rect.bottom - rect.top;
 	glViewport(0 , 0 , width, height);
-	eRet = glGetError();
+	GLenum eRet = glGetError();
 	assert(0 == eRet);  
 
 	return JZ_SUCCESS;
@@ -325,7 +281,7 @@ void JZScene::RenderScene()
 	//assert(0 == eRet);
 
 	////////////////////////////////////绘制图形////////////////////////////////////////
-	glBindVertexArray(VAO);
+	glBindVertexArray(m_VAO);
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
@@ -538,21 +494,6 @@ void JZScene::_MouseControlModel()
 }
 
 ////////////////////////////4.释放内存部分的函数///////////////////////////////////
-void JZScene::DestroyOpenGL()
-{
-	m_hRC = ::wglGetCurrentContext();  
-
-	if(m_hRC)  
-	{  
-		::wglDeleteContext(m_hRC);
-	}  
-
-	if(m_hDC)  
-	{  
-		delete m_hDC;  
-	}  
-	m_hDC = NULL;  
-}
 
 extern "C" _declspec(dllexport) IJZScene* GetSceneAPI()
 {

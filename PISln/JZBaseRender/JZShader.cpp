@@ -28,8 +28,8 @@ JZShader::JZShader()
 {
 	m_shaderProgram = 0;
 	m_strVertex = "";		// 顶点着色器代码
-	m_strFragment = "";	// 片段着色器代码
-	m_strGeometry = "";	// 几何着色器代码
+	m_strFragment = "";		// 片段着色器代码
+	m_strGeometry = "";		// 几何着色器代码
 }
 
 JZShader::JZShader(const char** shaderPath, int iShaderNums)
@@ -63,6 +63,11 @@ JZShader::JZShader(const char** shaderPath, int iShaderNums)
 	_CompileShaderCode();
 }
 
+JZShader::~JZShader()
+{
+	Release();
+}
+
 JZResType JZShader::GetResType()
 {
 	return JZ_RES_SHADER;
@@ -72,6 +77,14 @@ void JZShader::Use()
 {
 	assert(1 == glIsProgram(m_shaderProgram));
 	glUseProgram(m_shaderProgram);
+}
+
+// 解除使用着色器程序
+void JZShader::UnUse()
+{
+	glUseProgram(0);
+	GLenum eRet = glGetError();
+	assert(0 == eRet);
 }
 
 // shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、像素着色器
@@ -111,10 +124,14 @@ unsigned int JZShader::GetProgramID()
 	return m_shaderProgram;
 }
 
-void JZShader::Delete()
+void JZShader::Release()
 {
 	if (1 == glIsProgram(m_shaderProgram))
+	{
 		glDeleteProgram(m_shaderProgram);
+		m_shaderProgram = 0;
+	}
+		
 }
 
 void JZShader::_SetShaderCode(const char* shaderPath, JZShaderType shaderType)

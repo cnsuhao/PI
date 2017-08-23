@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <JZScene.h>
+#include <IJZBaseRender.h>
 
 // CUIDialogDlg ¶Ô»°¿ò
 class CUIDialogDlg : public CDialogEx
