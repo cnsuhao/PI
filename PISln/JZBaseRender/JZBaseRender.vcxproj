@@ -158,6 +158,10 @@
     <ClCompile Include="..\..\lib\Import_lib\OpenGL\JZShader.cpp" />
     <ClCompile Include="JZScene.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\sys\shaders\texture.frag" />
+    <None Include="..\..\sys\shaders\texture.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

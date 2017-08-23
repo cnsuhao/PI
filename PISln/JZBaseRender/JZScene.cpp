@@ -101,26 +101,24 @@ void JZScene::PrepareData()
 	// 【2】顶点坐标、颜色、纹理坐标
 	GLfloat vertices[] = 
 	{
-		//-----位置-----		---纹理坐标---
-		-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
-		1.0f, -1.0f, -1.0f,  1.0f, 0.0f,
-		1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-		1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-		-1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+		//-----位置-----		-----颜色-----		---纹理坐标---
+		1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   // 右上
+		1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,   // 右下
+		-1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,   // 左下
+		-1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f    // 左上
 	};
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		Vertex vertex;
-		vertex.position.x = vertices[i*5 + 0];
-		vertex.position.y = vertices[i*5 + 1];
-		vertex.position.z = vertices[i*5 + 2];
-		vertex.color.r = 1.0f;
-		vertex.color.g = 1.0f;
-		vertex.color.b = 1.0f;
-		vertex.texture.x = vertices[i*5 + 3];
-		vertex.texture.y = vertices[i*5 + 4];
+		vertex.position.x = vertices[i * 8 + 0];
+		vertex.position.y = vertices[i * 8 + 1];
+		vertex.position.z = vertices[i * 8 + 2];
+		vertex.color.r = vertices[i * 8 + 3];
+		vertex.color.g = vertices[i * 8 + 4];
+		vertex.color.b = vertices[i * 8 + 5];
+		vertex.texture.x = vertices[i * 8 + 6];
+		vertex.texture.y = vertices[i * 8 + 7];
 		AddPoint(vertex);
 	}
 }
@@ -137,17 +135,24 @@ void JZScene::PushDataToGPU()
 		vertices2[i*8 + 3] = pointArray[i].color.r;
 		vertices2[i*8 + 4] = pointArray[i].color.g;
 		vertices2[i*8 + 5] = pointArray[i].color.b;
-		vertices2[i*8 + 4] = pointArray[i].texture.x;
-		vertices2[i*8 + 5] = pointArray[i].texture.y;
+		vertices2[i*8 + 6] = pointArray[i].texture.x;
+		vertices2[i*8 + 7] = pointArray[i].texture.y;
 	}
+
+	GLuint verticesIndex[] =
+	{
+		0,1,3,
+		1,2,3
+	};
 
 	GLint texWidth;
 	GLint texHeight;
-	GLubyte* image1 = SOIL_load_image("../../sys/images/test.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+	GLubyte* image = SOIL_load_image("../../sys/images/awesomeface.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 
 	GLenum eRet = 0;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -156,7 +161,7 @@ void JZScene::PushDataToGPU()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	eRet = glGetError();
@@ -170,8 +175,12 @@ void JZScene::PushDataToGPU()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(3*sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(6*sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (const void*)(6*sizeof(GLfloat)));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(verticesIndex), verticesIndex, GL_STATIC_DRAW);
+
 	glBindVertexArray(0);
 	eRet = glGetError();
 	assert(0 == eRet);
@@ -185,7 +194,7 @@ void JZScene::PushDataToGPU()
 	assert(0 == eRet);
 
 	delete[] vertices2;
-	SOIL_free_image_data(image1);
+	SOIL_free_image_data(image);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	eRet = glGetError();
 	assert(0 == eRet);
@@ -317,13 +326,14 @@ void JZScene::RenderScene()
 
 	////////////////////////////////////绘制图形////////////////////////////////////////
 	glBindVertexArray(VAO);
-	//glDrawArrays(GL_TRIANGLES, 0, 36);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
-	glEnable(GL_POINT_SMOOTH);
+	/*glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_PROGRAM_POINT_SIZE);
-	glDrawArrays(GL_POINTS, 0, pointArray.size());
+	glDrawArrays(GL_POINTS, 0, pointArray.size());*/
 	glBindVertexArray(0);
 	eRet = glGetError();
 	assert(0 == eRet);
