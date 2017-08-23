@@ -46,7 +46,7 @@ public:
 	int m_shaderNums;				// shader路径数组中包含了几个着色器,按照顶点着色器、片段着色器、几何着色器的顺序排列
 	IJZShader* pShader;				// OpenGL中的shader
 	GLuint texture;					// OpenGL中的纹理
-	GLuint VAO, VBO;				// OpenGL中VAO、VBO
+	GLuint VAO, VBO, EBO;			// OpenGL中VAO、VBO
 	glm::mat4 modelMatrix;			// 模型矩阵
 	glm::mat4 viewMatrix;			// 观察矩阵
 	glm::mat4 projectionMatrix;		// 投影矩阵
