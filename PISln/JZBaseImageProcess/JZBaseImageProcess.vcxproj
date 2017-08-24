@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\IJZBaseImageProcess.h" />
+    <ClInclude Include="..\..\include\IJZBaseImageProcessProc.h" />
     <ClInclude Include="..\..\include\JZAutoLoader.h" />
     <ClInclude Include="..\..\include\JZAutoSetEnv.h" />
     <ClInclude Include="..\..\include\JZCommonImageDef.h" />

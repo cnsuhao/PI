@@ -5,24 +5,20 @@
 #include <sstream>
 #include <cassert>
 
+#pragma comment(lib, "opengl32.lib")
 #ifdef _DEBUG
 #	ifdef _WIN64
 #		pragma comment(lib, "glew64d.lib")
-#		pragma comment(lib, "SOIL64s_d.lib")
 #	else
 #		pragma comment(lib, "glew32d.lib")
-#		pragma comment(lib, "SOIL32s_d.lib")
 #	endif
 #else
 #	ifdef _WIN64
 #		pragma comment(lib, "glew64.lib")
-#		pragma comment(lib, "SOIL64s.lib")
 #	else
 #		pragma comment(lib, "glew32.lib")
-#		pragma comment(lib, "SOIL32s.lib")
 #	endif
 #endif // _DEBUG
-#pragma comment(lib, "opengl32.lib")
 
 JZShader::JZShader() 
 {
@@ -88,7 +84,7 @@ void JZShader::UnUse()
 }
 
 // shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、像素着色器
-JZ_RESULT JZShader::CreateShaderProgram(const char** shaderPath, int iShaderNums)
+JZ_RESULT JZShader::Create(const char** shaderPath, int iShaderNums)
 {
 	// 输入参数检查
 	if (NULL == shaderPath || NULL == *shaderPath || iShaderNums <=1)

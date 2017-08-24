@@ -35,7 +35,9 @@ struct JZImageBuf
 	int					v_Pitch;		// V 分片数据一行的字节数
 	unsigned char*		alpha;			// A 通道，部分像素格式未用（如不含 A 或者无分离的 A 通道）
 	int					a_Pitch;		// A 通道一行的字节数
-	JZ_PIXEL_FMT		pixel_fmt;		// 像素格式	
+	JZ_PIXEL_FMT		pixel_fmt;		// 像素格式
+	int					width;			// 图像宽度
+	int					height;			// 图像高度
 
 };
 

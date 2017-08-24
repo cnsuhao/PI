@@ -27,7 +27,7 @@ public:
 	// 解除使用着色器程序
 	virtual void UnUse();
 	// shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、几何着色器的顺序排列
-	virtual JZ_RESULT CreateShaderProgram(const char** shaderPath, int iShaderNums);
+	virtual JZ_RESULT Create(const char** shaderPath, int iShaderNums);
 	// 获取着色器程序ID
 	virtual unsigned int GetProgramID();
 	// 释放着色器程序

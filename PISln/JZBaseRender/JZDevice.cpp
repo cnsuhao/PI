@@ -1,6 +1,23 @@
 #include "JZDevice.h"
 #include <GL/glew.h>
 #include <cassert>
+
+#pragma comment(lib, "opengl32.lib")
+#ifdef _DEBUG
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64d.lib")
+#	else
+#		pragma comment(lib, "glew32d.lib")
+#	endif
+#else
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64.lib")
+#	else
+#		pragma comment(lib, "glew32.lib")
+#	endif
+#endif // _DEBUG
+
+
 JZDevice::JZDevice()
 {
 	m_hDC = NULL;
@@ -60,19 +77,21 @@ JZDevice::JZDevice(HWND hWnd, HDC hDC, HGLRC hShareRC)
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+
+	RECT rect; //在这个矩形中画图  
+	GetClientRect(hWnd, &rect);
+	//绘制区域占据整个窗口大小 
+	GLsizei width = rect.right - rect.left;
+	GLsizei height = rect.bottom - rect.top;
+	glViewport(0, 0, width, height);
+
 	eRet = glGetError();
 	assert(0 == eRet);
 }
 
 JZDevice::~JZDevice()
 {
-	bool bRet = wglMakeCurrent(m_hDC, NULL);// 当前渲染环境置空
-	bRet = wglDeleteContext(m_hGLRC);// 删除渲染环境
-	m_hGLRC = NULL;
-	if (NULL != m_hDC)
-	{
-		m_hDC = NULL;
-	}
+	Release();
 }
 
 JZResType JZDevice::GetResType()
@@ -80,7 +99,7 @@ JZResType JZDevice::GetResType()
 	return JZ_RES_DEVICE;
 }
 
-JZ_RESULT JZDevice::CreateDevice(HWND hWnd, HDC hDC, HGLRC hShareRC)
+JZ_RESULT JZDevice::Create(HWND hWnd, HDC hDC/* = NULL*/, HGLRC hShareRC/* = NULL*/)
 {
 	if (NULL == hWnd)
 	{
@@ -92,8 +111,6 @@ JZ_RESULT JZDevice::CreateDevice(HWND hWnd, HDC hDC, HGLRC hShareRC)
 		m_hDC = ::GetDC(hWnd);
 	}
 
-
-	GLenum eRet = 0;
 	static PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR),
 		1,
 		PFD_DRAW_TO_WINDOW |
@@ -133,8 +150,14 @@ JZ_RESULT JZDevice::CreateDevice(HWND hWnd, HDC hDC, HGLRC hShareRC)
 
 	glewExperimental = GL_TRUE;
 	glewInit();
-	eRet = glGetError();
-	assert(0 == eRet);
+
+	RECT rect; //在这个矩形中画图  
+	GetClientRect(hWnd, &rect);
+	//绘制区域占据整个窗口大小 
+	GLsizei width = rect.right - rect.left;
+	GLsizei height = rect.bottom - rect.top;
+	glViewport(0, 0, width, height);
+	assert(0 == glGetError());
 
 	return JZ_SUCCESS;
 }

@@ -35,5 +35,8 @@
     <ClInclude Include="JZBaseImageProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\IJZBaseImageProcessProc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

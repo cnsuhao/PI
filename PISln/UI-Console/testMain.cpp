@@ -1,7 +1,7 @@
-#include "IJZBaseImageProcess.h"
+#include "IJZBaseImageProcessProc.h"
 int main()
 {
-	IJZBaseImageProcess* pAPI = NULL;
+	IJZBaseImageProcessAPI* pAPI = NULL;
 	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pAPI);
 	JZImageBuf src = { 0 };
 	JZImageBuf des = { 0 };

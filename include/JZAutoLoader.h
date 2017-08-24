@@ -17,12 +17,24 @@ inline void JZDLL_Unload(HMODULE hDLL)
 
 // 加载库子函数
 inline HMODULE _JZDLL_LoadLibrary(LPCTSTR szDLLName, // 动态库名，不包含扩展名 
-								  LPCTSTR szPostfix) // 后缀名，包含了扩展名
+								  LPCTSTR szPostfix, // 后缀名，包含了扩展名
+								  LPCTSTR szDLLPath = NULL) // 动态库所在目录路径 
 {
 	TCHAR s_name[MAX_PATH] = { 0 };
 	s_name[0] = '\0';
-	_tcscpy(s_name, szDLLName);
-	_tcscat(s_name, szPostfix);
+	if (NULL == szDLLPath)
+	{
+		_tcscpy(s_name, szDLLName);
+		_tcscat(s_name, szPostfix);
+	}
+	else
+	{
+		_tcscpy(s_name, szDLLPath);
+		_tcscat(s_name, JZDIR_SEPARATOR_S);
+		_tcscat(s_name, szDLLName);
+		_tcscat(s_name, szPostfix);
+	}
+	
 	return LoadLibrary(s_name);
 }
 

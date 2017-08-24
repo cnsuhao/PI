@@ -3,7 +3,7 @@
 
 #include "IJZBaseImageProcess.h"
 
-class JZBaseImageProcess : public IJZBaseImageProcess
+class JZBaseImageProcess : public IJZBaseImageProcessAPI
 {
 public:
 	JZBaseImageProcess() {}

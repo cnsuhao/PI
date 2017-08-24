@@ -73,6 +73,7 @@
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
@@ -85,6 +86,7 @@
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include/OpenGL;../../include;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenGL/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
@@ -150,14 +152,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\IJZBaseRender.h" />
-    <ClInclude Include="..\..\include\OpenGL\camera.h" />
+    <ClInclude Include="..\..\include\IJZBaseRenderProc.h" />
     <ClInclude Include="JZDevice.h" />
+    <ClInclude Include="JZMesh.h" />
     <ClInclude Include="JZScene.h" />
     <ClInclude Include="JZShader.h" />
     <ClInclude Include="JZTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JZDevice.cpp" />
+    <ClCompile Include="JZMesh.cpp" />
     <ClCompile Include="JZScene.cpp" />
     <ClCompile Include="JZShader.cpp" />
     <ClCompile Include="JZTexture.cpp" />

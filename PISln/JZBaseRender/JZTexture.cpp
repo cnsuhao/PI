@@ -2,6 +2,22 @@
 #include "JZTexture.h"
 #include <GL/glew.h> // 包含glew来获取所有的必须OpenGL头文件
 
+#pragma comment(lib, "opengl32.lib")
+#ifdef _DEBUG
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64d.lib")
+#	else
+#		pragma comment(lib, "glew32d.lib")
+#	endif
+#else
+#	ifdef _WIN64
+#		pragma comment(lib, "glew64.lib")
+#	else
+#		pragma comment(lib, "glew32.lib")
+#	endif
+#endif // _DEBUG
+
+
 JZTexture::JZTexture()
 {
 	m_texID = 0;
@@ -19,12 +35,12 @@ JZResType JZTexture::GetResType()
 	return JZ_RES_TEX;
 }
 
-JZ_RESULT JZTexture::Create(int width, int height, JZImageBuf* pImageBuf)
+JZ_RESULT JZTexture::Create(JZImageBuf* pImageBuf/* = NULL*/)
 {
 	if (0 == m_texID) // 需要创建纹理
 	{
-		m_texWidth = width;
-		m_texHeight = height;
+		m_texWidth = pImageBuf->width;
+		m_texHeight = pImageBuf->height;
 		glGenTextures(1, &m_texID);
 		glBindTexture(GL_TEXTURE_2D, m_texID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -68,7 +84,7 @@ JZ_RESULT JZTexture::Release()
 
 JZ_RESULT JZTexture::FillImage(JZImageBuf* pImageBuf)
 {
-	if (JZ_PIXFMT_RGB == pImageBuf->pixel_fmt)
+	if (JZ_PIXFMT_RGB == pImageBuf->pixel_fmt && m_texWidth == pImageBuf->width && m_texHeight == pImageBuf->height)
 	{
 		glBindTexture(GL_TEXTURE_2D, m_texID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -81,6 +97,10 @@ JZ_RESULT JZTexture::FillImage(JZImageBuf* pImageBuf)
 		GLenum eRet = glGetError();
 		assert(0 == eRet);
 		return JZ_SUCCESS;
+	}
+	else
+	{
+		return JZ_FAILED;
 	}
 }
 

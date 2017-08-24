@@ -25,13 +25,13 @@ JZ_RESULT JZBaseImageProcess::ReadImage(IN const char* filename, OUT JZImageBuf*
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI) 
+JZ_RESULT GetInterface(IJZBaseImageProcessAPI** ppAPI) 
 {
 	*ppAPI = new JZBaseImageProcess();
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT ReleaseInterface(IJZBaseImageProcess* pAPI)
+JZ_RESULT ReleaseInterface(IJZBaseImageProcessAPI* pAPI)
 {
 	if (NULL != pAPI)
 	{

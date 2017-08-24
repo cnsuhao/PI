@@ -6,11 +6,26 @@
 #include "UI-Dialog.h"
 #include "UI-DialogDlg.h"
 #include "afxdialogex.h"
-
+#include <SOIL/SOIL.h>
+#include <IJZBaseRenderProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+#pragma comment(lib, "opengl32.lib")
+#ifdef _DEBUG
+#	ifdef _WIN64
+#		pragma comment(lib, "SOIL64s_d.lib")
+#	else
+#		pragma comment(lib, "SOIL32s_d.lib")
+#	endif
+#else
+#	ifdef _WIN64
+#		pragma comment(lib, "SOIL64s.lib")
+#	else
+#		pragma comment(lib, "SOIL32s.lib")
+#	endif
+#endif // _DEBUG
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -65,6 +80,9 @@ BEGIN_MESSAGE_MAP(CUIDialogDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CUIDialogDlg::OnBnClickedButtonOpen)
+	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CUIDialogDlg::OnBnClickedButtonClear)
+//	ON_WM_CLOSE()
+ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -100,16 +118,18 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	HMODULE hDLL = LoadLibrary(_T("../../dll/x64/Debug/JZBaseRender.dll"));
+	/*HMODULE hDLL = LoadLibrary(_T("E:\\GitCode\\PI\\dll\\x64\\Debug\\JZBaseRenderd.dll"));
 	typedef IJZScene* (*GetSceneAPI)();
 	GetSceneAPI pfn = (GetSceneAPI)GetProcAddress(hDLL, "GetSceneAPI");
-	m_pScene = pfn();
+	m_pScene = pfn();*/
+
+	m_pScene = NULL;
+	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
 
-	m_pScene->SetHWnd(cwnd->m_hWnd);
-	m_pScene->InitOpenGL();
+	m_pScene->SetDevice(cwnd->m_hWnd);
 	m_pScene->PrepareData();
-	m_pScene->PushDataToGPU();
+	
 
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -164,9 +184,45 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CUIDialogDlg::OnBnClickedButtonOpen()
 {
 	// TODO: Add your control notification handler code here
+	int texWidth = 1;
+	int texHeight = 1;
+	unsigned char* image = SOIL_load_image("../../sys/images/awesomeface.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+
+	JZImageBuf imageBuf = { 0 };
+	imageBuf.color = image;
+	imageBuf.pitch = texWidth * 3;
+	imageBuf.pixel_fmt = JZ_PIXFMT_RGB;
+	imageBuf.width = texWidth;
+	imageBuf.height = texHeight;
+	m_pScene->SetImage(&imageBuf);
+	SOIL_free_image_data(image);
+	m_pScene->SetResStatus(true);
+}
+
+
+void CUIDialogDlg::OnBnClickedButtonClear()
+{
+	// TODO: Add your control notification handler code here
+	m_pScene->SetImage(NULL);
+	m_pScene->SetResStatus(true);
+}
+
+
+//void CUIDialogDlg::OnClose()
+//{
+//	// TODO: Add your message handler code here and/or call default
+//
+//	CDialogEx::OnClose();
+//}
+
+
+void CUIDialogDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: Add your message handler code here
+	g_JZBaseRenderAPI->pfnReleaseSceneInterface(m_pScene);
 }
