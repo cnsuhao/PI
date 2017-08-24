@@ -145,6 +145,6 @@ public:
 	}
 };
 
-JZAutoSetEnv g_autoSet;
+//JZAutoSetEnv g_autoSet;
 #endif // __JZ_AUTOSETENV_H__
 
