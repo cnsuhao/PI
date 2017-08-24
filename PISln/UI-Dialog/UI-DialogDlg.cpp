@@ -118,7 +118,7 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	/*HMODULE hDLL = LoadLibrary(_T("E:\\GitCode\\PI\\dll\\x64\\Debug\\JZBaseRenderd.dll"));
+	/*HMODULE hDLL = LoadLibrary(_T("D:\\GitCode\\PI\\dll\\x64\\Debug\\JZBaseRenderd.dll"));
 	typedef IJZScene* (*GetSceneAPI)();
 	GetSceneAPI pfn = (GetSceneAPI)GetProcAddress(hDLL, "GetSceneAPI");
 	m_pScene = pfn();*/

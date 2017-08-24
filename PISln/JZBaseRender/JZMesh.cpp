@@ -179,24 +179,23 @@ JZ_RESULT JZMesh::CreateQuadMesh()
 JZ_RESULT JZMesh::Release()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
+	assert(0 == glGetError());
 	// 让顶点属性(顶点坐标、颜色、纹理坐标)失效
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
-
+	assert(0 == glGetError());
 	// 释放VBO
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &m_VBO);
-
+	assert(0 == glGetError());
 	// 释放EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &m_EBO);
-
+	assert(0 == glGetError());
 	// 释放VAO
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &m_VAO);
-
 	assert(0 == glGetError());
 
 	return JZ_SUCCESS;

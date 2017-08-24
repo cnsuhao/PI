@@ -126,6 +126,7 @@ void JZShader::Release()
 	{
 		glDeleteProgram(m_shaderProgram);
 		m_shaderProgram = 0;
+		assert(0 == glGetError());
 	}
 		
 }

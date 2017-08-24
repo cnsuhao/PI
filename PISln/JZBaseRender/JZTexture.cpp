@@ -1,7 +1,7 @@
 #include <cassert>
 #include "JZTexture.h"
 #include <GL/glew.h> // 包含glew来获取所有的必须OpenGL头文件
-
+#include <iostream>
 #pragma comment(lib, "opengl32.lib")
 #ifdef _DEBUG
 #	ifdef _WIN64

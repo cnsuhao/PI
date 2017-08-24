@@ -143,20 +143,23 @@ void JZScene::Release()
 		delete (JZShader*)m_pShader;
 		m_pShader = NULL;
 	}
-
+	
 	if (NULL != m_pTexture)
 	{
 		delete (JZTexture*)m_pTexture;
-	}
-
-	if (NULL != m_pDevice)
-	{
-		delete (JZDevice*)m_pDevice;
+		m_pTexture = NULL;
 	}
 
 	if (NULL != m_pMesh)
 	{
 		delete (JZMesh*)m_pMesh;
+		m_pMesh = NULL;
+	}
+
+	if (NULL != m_pDevice) // 注意OpenGL设备应该最后释放，因为其他资源都用到了OpenGL
+	{
+		delete (JZDevice*)m_pDevice;
+		m_pDevice = NULL;
 	}
 }
 
@@ -178,7 +181,7 @@ JZ_RESULT ReleaseSceneInterface(IJZScene* pScene)
 {
 	if (NULL != pScene)
 	{
-		delete pScene;
+		delete (JZScene*)pScene;
 		pScene = NULL;
 	}
 	return JZ_SUCCESS;
