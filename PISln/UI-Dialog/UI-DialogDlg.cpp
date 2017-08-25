@@ -7,7 +7,7 @@
 #include "UI-DialogDlg.h"
 #include "afxdialogex.h"
 #include <SOIL/SOIL.h>
-#include "IJZBaseImageProcessProc.h"
+#include <IJZBaseImageProcessProc.h>
 #include <IJZBaseRenderProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW

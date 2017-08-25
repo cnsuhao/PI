@@ -66,9 +66,6 @@ inline HMODULE JZDLL_Load(
 		return NULL;
 	}
 
-	// 将Import_dll目录下的所有子目录设置为环境变量
-	JZDLL_SetEnv(NULL);
-
 	HMODULE hDLL = NULL;
 	// 预先加载一次，避免重复的搜索缺省路径，尤其是单件加载器被多个库调用时
 #ifdef _DEBUG
@@ -155,6 +152,12 @@ public:
 		else
 		{
 			_Pos _Pval;
+			// 将依赖的第三方库设置为环境变量
+			for (int i = 0; i < _Pval.ThirdPartyNum(); i++)
+			{
+				JZDLL_SetEnv(_Pval.ThirdParty()[i]);
+			}
+			
 			_Moudle = JZDLL_Load(_Pval.DLLName(), _Pval.APIExtName(), (void**)&_Fpval);
 			return _IsLoaded();
 		}	
