@@ -3,7 +3,6 @@
 
 #include <Windows.h>
 #include <tchar.h>
-#include <JZAutoLoader.h>
 #include <JZCommonImageDef.h>
 
 // 接口基类

@@ -111,9 +111,9 @@ inline HMODULE JZDLL_Load(
 	if (NULL == _tcsstr(s_env, s_top))
 	{
 		_tcscat(s_env, s_top);
+		SetEnvironmentVariable(_T("Path"), s_env);
 	}
-	SetEnvironmentVariable(_T("Path"), s_env);
-
+	
 #ifdef _DEBUG
 	hDLL = _JZDLL_LoadLibrary(szDLLName, JZDLL_POSTFIX_DEBUG); // 如果系统处于 DEBUG 模式下时，尝试导入 DEBUG 版本库
 #endif // _DEBUG

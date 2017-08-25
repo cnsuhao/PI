@@ -1,6 +1,7 @@
 #ifndef __IJZ_BASEIMAGEPROCESSPROC_H__
 #define __IJZ_BASEIMAGEPROCESSPROC_H__
 #include <IJZBaseImageProcess.h>
+#include <JZAutoLoader.h>
 
 #define JZ_BASEIMAGEPROCESS_DLL_NAME			_T("JZBaseImageProcess")
 #define JZ_BASEIMAGEPROCESS_API_EXT_NAME		"JZBIP_GetAPIStuPtr"

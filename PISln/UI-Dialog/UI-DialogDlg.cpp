@@ -7,6 +7,7 @@
 #include "UI-DialogDlg.h"
 #include "afxdialogex.h"
 #include <SOIL/SOIL.h>
+#include "IJZBaseImageProcessProc.h"
 #include <IJZBaseRenderProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -116,6 +117,14 @@ BOOL CUIDialogDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+
+	IJZBaseImageProcessAPI* pAPI = NULL;
+	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pAPI);
+	JZImageBuf src = { 0 };
+	JZImageBuf des = { 0 };
+	JZCommonParam param;
+	res = pAPI->ReadImage("../../sys/images/test.jpg", NULL);
+	res = g_JZBaseImageProcessAPI->pfnReleaseInterface(pAPI);
 
 	// TODO: 在此添加额外的初始化代码
 	/*HMODULE hDLL = LoadLibrary(_T("D:\\GitCode\\PI\\dll\\x64\\Debug\\JZBaseRenderd.dll"));

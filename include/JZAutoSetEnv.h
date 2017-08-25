@@ -93,7 +93,8 @@ inline void JZDLL_SetEnv(LPCTSTR szImportDLLPath)
 			_tcscat(s_path, JZENV_SEPARATOR_S);
 			if (NULL == _tcsstr(s_env, s_path))
 			{
-				SetEnvironmentVariable(_T("Path"), s_path);
+				_tcscat(s_env, s_path);
+				SetEnvironmentVariable(_T("Path"), s_env);
 			}
 			s_path[0] = '\0';
 		}
@@ -114,7 +115,8 @@ inline void JZDLL_SetEnv(LPCTSTR szImportDLLPath)
 				_tcscat(s_path, JZENV_SEPARATOR_S);
 				if (NULL == _tcsstr(s_env, s_path))
 				{
-					SetEnvironmentVariable(_T("Path"), s_path);
+					_tcscat(s_env, s_path);
+					SetEnvironmentVariable(_T("Path"), s_env);
 				}
 				s_path[0] = '\0';
 			}

@@ -71,25 +71,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <OutDir>$(SolutionDir)../Bin/$(Platform)/$(Configuration)</OutDir>
-    <IncludePath>..\..\include;..\..\include\OpenCV;$(IncludePath)</IncludePath>
+    <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(SolutionDir)..\Intermediate\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
-    <OutDir>$(SolutionDir)..\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>..\..\include;..\..\include\OpenCV;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <OutDir>$(SolutionDir)../Bin/$(Platform)/$(Configuration)</OutDir>
+    <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <OutDir>$(SolutionDir)../Bin/$(Platform)/$(Configuration)</OutDir>
-    <IncludePath>..\..\include;..\..\include\OpenCV;$(IncludePath)</IncludePath>
+    <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(SolutionDir)..\Intermediate\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
-    <OutDir>$(SolutionDir)..\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>..\..\include;..\..\include\OpenCV;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
+    <OutDir>$(SolutionDir)../Bin/$(Platform)/$(Configuration)</OutDir>
+    <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
