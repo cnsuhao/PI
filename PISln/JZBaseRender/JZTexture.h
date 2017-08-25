@@ -12,7 +12,7 @@ public:
 	// 获取资源类型
 	virtual JZResType GetResType();		
 	// 创建纹理资源，目前仅支持RGB图像
-	virtual JZ_RESULT Create(JZImageBuf* pImageBuf = NULL);	
+	virtual JZ_RESULT Create(JZImageBuf* pImageBuf);	
 	// 释放纹理资源
 	virtual JZ_RESULT Release();	
 	// 往纹理中填充图像数据，仅支持RGB图像，并且只支持和已经创建的纹理宽高一样的情况，该接口慎用

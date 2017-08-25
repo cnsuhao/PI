@@ -90,7 +90,7 @@ public:
 	// 获取资源类型
 	virtual JZResType GetResType() = 0;
 	// 创建纹理资源，目前仅支持RGB图像
-	virtual JZ_RESULT Create(JZImageBuf* pImageBuf = NULL) = 0;	
+	virtual JZ_RESULT Create(JZImageBuf* pImageBuf) = 0;	
 	// 释放纹理资源
 	virtual JZ_RESULT Release() = 0;
 	// 往纹理中填充图像数据，目前只支持和已经创建的纹理宽高一样的情况，该接口慎用
@@ -125,8 +125,8 @@ class IJZScene: public IJZBaseRender
 public:
 	// 设置OpenGL设备
 	virtual JZ_RESULT SetDevice(HWND hWnd) = 0;		
-	// 设置要渲染的图像
-	virtual void SetImage(JZImageBuf* pImageBuf) = 0;	
+	// 设置要渲染的图像， 仅支持RGB
+	virtual void SetImage(JZImageBuf* pImageBuf) = 0;		
 	// 准备绘制数据
 	virtual void PrepareData() = 0;	
 	// 设置资源的状态是否有改变

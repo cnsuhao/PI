@@ -35,12 +35,38 @@ JZResType JZTexture::GetResType()
 	return JZ_RES_TEX;
 }
 
-JZ_RESULT JZTexture::Create(JZImageBuf* pImageBuf/* = NULL*/)
+JZ_RESULT JZTexture::Create(JZImageBuf* pImageBuf)
 {
+	if (NULL == pImageBuf)
+	{
+		return JZ_FAILED;
+	}
+
 	if (0 == m_texID) // 需要创建纹理
 	{
 		m_texWidth = pImageBuf->width;
 		m_texHeight = pImageBuf->height;
+		GLint internalformat = GL_RGB;// 目前OpenGL内部像素格式仅支持RGB形式的
+		GLenum outformat = 0;
+		switch (pImageBuf->pixel_fmt)
+		{
+		case JZ_PIXFMT_BGR:
+			outformat = GL_BGR;
+			break;
+		case JZ_PIXFMT_BGRA:
+			outformat = GL_BGRA;
+			break;
+		case JZ_PIXFMT_RGB:
+			outformat = GL_RGB;
+			break;
+		case JZ_PIXFMT_RGBA:
+			outformat = GL_RGBA;
+			break;
+		default:
+			outformat = GL_BGR;
+			break;
+		}
+		
 		glGenTextures(1, &m_texID);
 		glBindTexture(GL_TEXTURE_2D, m_texID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -48,13 +74,13 @@ JZ_RESULT JZTexture::Create(JZImageBuf* pImageBuf/* = NULL*/)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, m_texID);
-		if (NULL != pImageBuf && NULL != pImageBuf->color)
+		if (NULL != pImageBuf->color)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageBuf->color);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_texWidth, m_texHeight, 0, outformat, GL_UNSIGNED_BYTE, pImageBuf->color);
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_texWidth, m_texHeight, 0, outformat, GL_UNSIGNED_BYTE, 0);
 		}
 		
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -86,13 +112,34 @@ JZ_RESULT JZTexture::FillImage(JZImageBuf* pImageBuf)
 {
 	if (JZ_PIXFMT_RGB == pImageBuf->pixel_fmt && m_texWidth == pImageBuf->width && m_texHeight == pImageBuf->height)
 	{
+		GLint internalformat = GL_RGB;// 目前OpenGL内部像素格式仅支持RGB形式的
+		GLenum outformat = 0;
+		switch (pImageBuf->pixel_fmt)
+		{
+		case JZ_PIXFMT_BGR:
+			outformat = GL_BGR;
+			break;
+		case JZ_PIXFMT_BGRA:
+			outformat = GL_BGRA;
+			break;
+		case JZ_PIXFMT_RGB:
+			outformat = GL_RGB;
+			break;
+		case JZ_PIXFMT_RGBA:
+			outformat = GL_RGBA;
+			break;
+		default:
+			outformat = GL_BGR;
+			break;
+		}
+
 		glBindTexture(GL_TEXTURE_2D, m_texID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, m_texID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_texWidth, m_texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageBuf->color);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_texWidth, m_texHeight, 0, outformat, GL_UNSIGNED_BYTE, pImageBuf->color);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		GLenum eRet = glGetError();
 		assert(0 == eRet);

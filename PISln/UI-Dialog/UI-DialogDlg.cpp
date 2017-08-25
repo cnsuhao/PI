@@ -118,24 +118,11 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-	IJZBaseImageProcessAPI* pAPI = NULL;
-	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pAPI);
-	JZImageBuf src = { 0 };
-	JZImageBuf des = { 0 };
-	JZCommonParam param;
-	res = pAPI->ReadImage("../../sys/images/test.jpg", NULL);
-	res = g_JZBaseImageProcessAPI->pfnReleaseInterface(pAPI);
-
 	// TODO: 在此添加额外的初始化代码
-	/*HMODULE hDLL = LoadLibrary(_T("D:\\GitCode\\PI\\dll\\x64\\Debug\\JZBaseRenderd.dll"));
-	typedef IJZScene* (*GetSceneAPI)();
-	GetSceneAPI pfn = (GetSceneAPI)GetProcAddress(hDLL, "GetSceneAPI");
-	m_pScene = pfn();*/
-
 	m_pScene = NULL;
 	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
+	
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
-
 	m_pScene->SetDevice(cwnd->m_hWnd);
 	m_pScene->PrepareData();
 	
@@ -196,19 +183,17 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 void CUIDialogDlg::OnBnClickedButtonOpen()
 {
 	// TODO: Add your control notification handler code here
-	int texWidth = 1;
-	int texHeight = 1;
-	unsigned char* image = SOIL_load_image("../../sys/images/awesomeface.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 
+	IJZBaseImageProcess* pBaseImageProcess = NULL;
+	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
 	JZImageBuf imageBuf = { 0 };
-	imageBuf.color = image;
-	imageBuf.pitch = texWidth * 3;
-	imageBuf.pixel_fmt = JZ_PIXFMT_RGB;
-	imageBuf.width = texWidth;
-	imageBuf.height = texHeight;
+	pBaseImageProcess->ReadImage("../../sys/images/awesomeface.png", &imageBuf);
 	m_pScene->SetImage(&imageBuf);
-	SOIL_free_image_data(image);
 	m_pScene->SetResStatus(true);
+	pBaseImageProcess->ReleaseImage(&imageBuf);
+	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
+
+	
 }
 
 

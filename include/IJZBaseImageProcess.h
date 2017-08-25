@@ -6,17 +6,19 @@
 #include <JZCommonImageDef.h>
 
 // 接口基类
-class IJZBaseImageProcessAPI
+class IJZBaseImageProcess
 {
 public:
-	IJZBaseImageProcessAPI() {}
-	~IJZBaseImageProcessAPI() {}
+	// 写图像
 	virtual JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param) = 0;
+	// 读图像，调用了ReadImage()函数，就要调用ReleaseImage()函数进行释放
 	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage) = 0;
+	// 释放图像数据
+	virtual JZ_RESULT ReleaseImage(JZImageBuf* pImage) = 0;
 };
 
-typedef JZ_RESULT(*DefGetInterface)(IJZBaseImageProcessAPI** ppAPI);
-typedef JZ_RESULT(*DefReleaseInterface)(IJZBaseImageProcessAPI* pAPI);
+typedef JZ_RESULT(*DefGetInterface)(IJZBaseImageProcess** ppAPI);
+typedef JZ_RESULT(*DefReleaseInterface)(IJZBaseImageProcess* pAPI);
 
 // 供外部调用的接口声明
 struct JZBaseImageProcessAPI
