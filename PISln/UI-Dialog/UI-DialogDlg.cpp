@@ -187,13 +187,11 @@ void CUIDialogDlg::OnBnClickedButtonOpen()
 	IJZBaseImageProcess* pBaseImageProcess = NULL;
 	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
 	JZImageBuf imageBuf = { 0 };
-	pBaseImageProcess->ReadImage("../../sys/images/awesomeface.png", &imageBuf);
+	pBaseImageProcess->ReadImage("../../sys/images/test.jpg", &imageBuf);
 	m_pScene->SetImage(&imageBuf);
 	m_pScene->SetResStatus(true);
 	pBaseImageProcess->ReleaseImage(&imageBuf);
 	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
-
-	
 }
 
 

@@ -30,7 +30,8 @@ private:
 	IJZTexture*		m_pTexture;			// OpenGL绘制需要的纹理资源
 	IJZDevice*		m_pDevice;			// OpenGL绘制需要的设备资源
 	IJZMesh*		m_pMesh;			// OpenGL绘制需要的网格资源
-
+	unsigned int	m_srcFramebuffer;	// 用于离屏渲染的帧缓存
+	unsigned int	m_dstFramebuffer;
 	bool			m_bResChanged;		// 用来标志是否有资源发生了改变，若改变了则要重新将数据传入显存
 };
 

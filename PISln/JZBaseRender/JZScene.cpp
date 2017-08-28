@@ -51,9 +51,9 @@ void JZScene::SetImage(JZImageBuf* pImageBuf)
 		int texWidth = 1;
 		int texHeight = 1;
 		unsigned char* image = new unsigned char[3];
-		image[0] = m_groundColor.r * 255;
-		image[1] = m_groundColor.g * 255;
-		image[2] = m_groundColor.b * 255;
+		image[0] = m_groundColor.r * 100;
+		image[1] = m_groundColor.g * 100;
+		image[2] = m_groundColor.b * 100;
 
 		JZImageBuf imageBuf = { 0 };
 		imageBuf.color = image;
@@ -87,9 +87,9 @@ void JZScene::PrepareData()
 	int texWidth = 1;
 	int texHeight = 1;
 	unsigned char* image = new unsigned char[3];
-	image[0] = m_groundColor.r * 255;
-	image[1] = m_groundColor.g * 255;
-	image[2] = m_groundColor.b * 255;
+	image[0] = m_groundColor.r * 100;
+	image[1] = m_groundColor.g * 100;
+	image[2] = m_groundColor.b * 100;
 	
 	JZImageBuf imageBuf = { 0 };
 	imageBuf.color = image;
@@ -102,6 +102,40 @@ void JZScene::PrepareData()
 	// 【3】网格资源
 	m_pMesh->CreateQuadMesh();
 
+	// 【4】帧缓存资源
+	GLuint srcRenderbuffer;
+	glGenRenderbuffers(1, &srcRenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, srcRenderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, 395, 487);
+
+	glGenFramebuffers(1, &m_srcFramebuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_srcFramebuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, srcRenderbuffer);
+
+	GLenum srcFrameStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+	if (GL_FRAMEBUFFER_COMPLETE != srcFrameStatus)
+	{
+		assert(0);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GLuint dstRenderbuffer;
+	glGenRenderbuffers(1, &dstRenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, dstRenderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, 395, 487);
+
+	glGenFramebuffers(1, &m_dstFramebuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_dstFramebuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, dstRenderbuffer);
+
+	GLenum dstFrameStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+	if (GL_FRAMEBUFFER_COMPLETE != dstFrameStatus)
+	{
+		assert(0);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 	m_bResChanged = true;
 }
 
@@ -112,6 +146,9 @@ void JZScene::SetResStatus(bool bHasChanged /*=true*/)
 
 void JZScene::RenderScene()
 {
+	// 未经图像处理的buffer
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_srcFramebuffer);
+	glViewport(0, 0, 395, 487);
 	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -133,6 +170,26 @@ void JZScene::RenderScene()
 	}
 
 	m_pMesh->Draw();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_srcFramebuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBlitFramebuffer(0, 0, 395, 487, 0, 0, 395, 487, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+	// 经过图像处理的buffer
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_dstFramebuffer);
+	glViewport(0, 0, 395, 487);
+	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	assert(0 == glGetError());
+	m_pMesh->Draw();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_dstFramebuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBlitFramebuffer(0, 0, 395, 487, 396, 0, 791, 487, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	SwapBuffers(wglGetCurrentDC()); 
 }
 
