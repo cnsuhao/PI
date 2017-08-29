@@ -113,6 +113,8 @@ public:
 	virtual JZ_RESULT Create(std::vector<Vertex> vertexSet, std::vector<unsigned int> indexSet, JZ_DRAW_UNIT drawUnit, JZ_DRAW_METHOD drawMethod) = 0;
 	// 创建用于显示图像的网格资源
 	virtual JZ_RESULT CreateQuadMesh() = 0;
+	// 根据绘制区域的宽高比和纹理宽高比创建网格资源
+	virtual JZ_RESULT CreateQuadMesh(float rectAspect, float texAspect) = 0;
 	// 释放网格资源
 	virtual JZ_RESULT Release() = 0;
 	// 绘制网格
@@ -124,13 +126,17 @@ class IJZScene: public IJZBaseRender
 {
 public:
 	// 设置OpenGL设备
-	virtual JZ_RESULT SetDevice(HWND hWnd) = 0;		
-	// 设置要渲染的图像， 仅支持RGB
-	virtual void SetImage(JZImageBuf* pImageBuf) = 0;		
-	// 准备绘制数据
-	virtual void PrepareData() = 0;	
-	// 设置资源的状态是否有改变
-	virtual void SetResStatus(bool bHasChanged = true) = 0;
+	virtual JZ_RESULT SetDevice(HWND hWnd) = 0;
+	// 设置shader资源
+	virtual void SetShader() = 0;
+	// 设置要渲染的左侧图像， 仅支持RGB
+	virtual void SetLeftImage(JZImageBuf* pImageBuf = NULL) = 0;
+	// 设置要渲染的右侧图像， 仅支持RGB
+	virtual void SetRightImage(JZImageBuf* pImageBuf = NULL) = 0;
+	// 设置背景颜色
+	virtual void SetGroundColor(glm::vec4 color = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f)) = 0;
+	// 初始化渲染需要的基本数据
+	virtual void init(HWND hWnd) = 0;
 	// 渲染绘制图形
 	virtual void RenderScene() = 0;
 	// 释放内存

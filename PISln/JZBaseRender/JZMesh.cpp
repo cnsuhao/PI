@@ -73,9 +73,12 @@ JZ_RESULT JZMesh::Create(std::vector<Vertex> vertexSet, std::vector<unsigned int
 		}
 		
 		// 生成VAO和VBO
-		glGenVertexArrays(1, &m_VAO);
-		glGenBuffers(1, &m_VBO);
-
+		if (0 != m_VAO && 0 != m_VBO)
+		{
+			glGenVertexArrays(1, &m_VAO);
+			glGenBuffers(1, &m_VBO);
+		}
+		
 		// VBO创建和传数据时，必须绑定在VAO上
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
@@ -108,10 +111,13 @@ JZ_RESULT JZMesh::Create(std::vector<Vertex> vertexSet, std::vector<unsigned int
 		}
 
 		// 生成VAO、VBO和EBO
-		glGenVertexArrays(1, &m_VAO);
-		glGenBuffers(1, &m_VBO);
-		glGenBuffers(1, &m_EBO);
-
+		if (0 == m_VAO && 0 == m_VBO && 0 == m_EBO)
+		{
+			glGenVertexArrays(1, &m_VAO);
+			glGenBuffers(1, &m_VBO);
+			glGenBuffers(1, &m_EBO);
+		}
+		
 		// VBO创建和传数据时，必须绑定在VAO上
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
@@ -165,6 +171,74 @@ JZ_RESULT JZMesh::CreateQuadMesh()
 		vertexSet.push_back(vertex);
 	}
 
+	std::vector<unsigned int> indexSet;
+	indexSet.push_back(0);
+	indexSet.push_back(1);
+	indexSet.push_back(3);
+	indexSet.push_back(1);
+	indexSet.push_back(2);
+	indexSet.push_back(3);
+
+	return Create(vertexSet, indexSet, JZ_DRAW_TRIANGLES, JZ_DRAW_ELEMENTS);
+}
+
+JZ_RESULT JZMesh::CreateQuadMesh(float rectAspect, float texAspect)
+{
+	std::vector<Vertex> vertexSet;
+
+	if (rectAspect < texAspect) // 当绘制区域的宽高比小于纹理宽高比时，也就是纹理的高度相对高于绘制区域时
+	{
+		float value = rectAspect / texAspect;
+		GLfloat vertices[] =
+		{
+			//-----位置-----		-----颜色-----		---纹理坐标---
+			1.0f,  value, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   // 右上
+			1.0f, -value, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,   // 右下
+			-1.0f, -value, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,   // 左下
+			-1.0f,  value, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f    // 左上
+		};
+
+		for (int i = 0; i < 4; i++)
+		{
+			Vertex vertex;
+			vertex.position.x = vertices[i * 8 + 0];
+			vertex.position.y = vertices[i * 8 + 1];
+			vertex.position.z = vertices[i * 8 + 2];
+			vertex.color.r = vertices[i * 8 + 3];
+			vertex.color.g = vertices[i * 8 + 4];
+			vertex.color.b = vertices[i * 8 + 5];
+			vertex.texture.x = vertices[i * 8 + 6];
+			vertex.texture.y = vertices[i * 8 + 7];
+			vertexSet.push_back(vertex);
+		}
+	}
+	else  // 当绘制区域的宽高比大于纹理宽高比时，也就是纹理的宽度相对宽于绘制区域时
+	{
+		float value = texAspect / rectAspect;
+		GLfloat vertices[] =
+		{
+			//-----位置-----		-----颜色-----		---纹理坐标---
+			value,  1.0, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   // 右上
+			value, -1.0, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,   // 右下
+			-value, -1.0, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,   // 左下
+			-value,  1.0, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f    // 左上
+		};
+
+		for (int i = 0; i < 4; i++)
+		{
+			Vertex vertex;
+			vertex.position.x = vertices[i * 8 + 0];
+			vertex.position.y = vertices[i * 8 + 1];
+			vertex.position.z = vertices[i * 8 + 2];
+			vertex.color.r = vertices[i * 8 + 3];
+			vertex.color.g = vertices[i * 8 + 4];
+			vertex.color.b = vertices[i * 8 + 5];
+			vertex.texture.x = vertices[i * 8 + 6];
+			vertex.texture.y = vertices[i * 8 + 7];
+			vertexSet.push_back(vertex);
+		}
+	}
+	
 	std::vector<unsigned int> indexSet;
 	indexSet.push_back(0);
 	indexSet.push_back(1);

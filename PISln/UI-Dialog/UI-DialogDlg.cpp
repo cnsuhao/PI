@@ -123,10 +123,8 @@ BOOL CUIDialogDlg::OnInitDialog()
 	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
 	
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
-	m_pScene->SetDevice(cwnd->m_hWnd);
-	m_pScene->PrepareData();
+	m_pScene->init(cwnd->m_hWnd);
 	
-
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -188,8 +186,7 @@ void CUIDialogDlg::OnBnClickedButtonOpen()
 	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
 	JZImageBuf imageBuf = { 0 };
 	pBaseImageProcess->ReadImage("../../sys/images/test.jpg", &imageBuf);
-	m_pScene->SetImage(&imageBuf);
-	m_pScene->SetResStatus(true);
+	m_pScene->SetLeftImage(&imageBuf);
 	pBaseImageProcess->ReleaseImage(&imageBuf);
 	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
 }
@@ -198,8 +195,21 @@ void CUIDialogDlg::OnBnClickedButtonOpen()
 void CUIDialogDlg::OnBnClickedButtonClear()
 {
 	// TODO: Add your control notification handler code here
-	m_pScene->SetImage(NULL);
-	m_pScene->SetResStatus(true);
+	IJZBaseImageProcess* pBaseImageProcess = NULL;
+	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
+	JZImageBuf srcImage = { 0 };
+	pBaseImageProcess->ReadImage("../../sys/images/test.jpg", &srcImage);
+	JZImageBuf desImage = { 0 };
+	desImage.width = srcImage.width;
+	desImage.height = srcImage.height;
+	desImage.pixel_fmt = JZ_PIXFMT_BGR;
+	desImage.color = new unsigned char[srcImage.height * srcImage.pitch];
+	desImage.pitch = srcImage.pitch;
+	pBaseImageProcess->BlurImage(&srcImage, &desImage, NULL);
+	m_pScene->SetRightImage(&desImage);
+	pBaseImageProcess->ReleaseImage(&srcImage);
+	delete[] desImage.color;
+	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
 }
 
 

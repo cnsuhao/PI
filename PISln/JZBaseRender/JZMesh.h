@@ -15,6 +15,8 @@ public:
 	virtual JZ_RESULT Create(std::vector<Vertex> vertexSet, std::vector<unsigned int> indexSet, JZ_DRAW_UNIT drawUnit, JZ_DRAW_METHOD drawMethod);
 	// 创建用于显示图像的网格资源
 	virtual JZ_RESULT CreateQuadMesh();
+	// 根据绘制区域的宽高比和纹理宽高比创建网格资源
+	virtual JZ_RESULT CreateQuadMesh(float rectAspect, float texAspect);
 	// 释放网格资源
 	virtual JZ_RESULT Release();
 	// 绘制网格

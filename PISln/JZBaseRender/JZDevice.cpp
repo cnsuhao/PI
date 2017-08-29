@@ -151,12 +151,6 @@ JZ_RESULT JZDevice::Create(HWND hWnd, HDC hDC/* = NULL*/, HGLRC hShareRC/* = NUL
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	RECT rect; //在这个矩形中画图  
-	GetClientRect(hWnd, &rect);
-	//绘制区域占据整个窗口大小 
-	GLsizei width = rect.right - rect.left;
-	GLsizei height = rect.bottom - rect.top;
-	glViewport(0, 0, width, height);
 	assert(0 == glGetError());
 
 	return JZ_SUCCESS;

@@ -11,14 +11,16 @@ public:
 	~JZScene();	
 	// 设置OpenGL设备
 	virtual JZ_RESULT SetDevice(HWND hWnd);
-	// 设置要渲染的图像
-	virtual void SetImage(JZImageBuf* pImageBuf);
+	// 设置shader资源
+	virtual void SetShader();
+	// 设置要渲染的左侧图像， 仅支持RGB
+	virtual void SetLeftImage(JZImageBuf* pImageBuf = NULL);
+	// 设置要渲染的右侧图像， 仅支持RGB
+	virtual void SetRightImage(JZImageBuf* pImageBuf = NULL);
 	// 设置背景颜色
-	void SetGroundColor(glm::vec4 color);	
-	// 准备绘制数据
-	virtual void PrepareData();
-	// 设置资源的状态是否有改变
-	virtual void SetResStatus(bool bHasChanged = true);
+	virtual void SetGroundColor(glm::vec4 color = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+	// 初始化渲染需要的基本数据
+	virtual void init(HWND hWnd);
 	// 渲染绘制图形
 	virtual void RenderScene();
 	// 释放内存
@@ -32,6 +34,7 @@ private:
 	IJZMesh*		m_pMesh;			// OpenGL绘制需要的网格资源
 	unsigned int	m_srcFramebuffer;	// 用于离屏渲染的帧缓存
 	unsigned int	m_dstFramebuffer;
+	HWND			m_hwnd;				// 用于绘制的窗口区域
 	bool			m_bResChanged;		// 用来标志是否有资源发生了改变，若改变了则要重新将数据传入显存
 };
 

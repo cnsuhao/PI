@@ -37,6 +37,20 @@ JZ_RESULT JZBaseImageProcess::ReadImage(IN const char* filename, OUT JZImageBuf*
 	return JZ_SUCCESS;
 }
 
+JZ_RESULT JZBaseImageProcess::BlurImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param)
+{
+	// ¸ßË¹ÂË²¨
+	Mat srcImage(Size(psrc->width, psrc->height), CV_8UC3);
+	int iImageBytes = psrc->height * psrc->pitch;
+	memcpy_s(srcImage.data, iImageBytes, psrc->color, iImageBytes);
+
+	Mat desImage;
+	GaussianBlur(srcImage, desImage, Size(15, 15), 3, 3, BORDER_DEFAULT);
+	memcpy_s(pdes->color, iImageBytes, desImage.data, iImageBytes);
+
+	return JZ_SUCCESS;
+}
+
 JZ_RESULT JZBaseImageProcess::ReleaseImage(JZImageBuf* pImage)
 {
 	if (NULL != pImage && NULL != pImage->color)

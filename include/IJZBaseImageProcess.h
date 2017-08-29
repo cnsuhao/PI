@@ -13,6 +13,8 @@ public:
 	virtual JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param) = 0;
 	// 读图像，调用了ReadImage()函数，就要调用ReleaseImage()函数进行释放
 	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage) = 0;
+	// 图像平滑(模糊)
+	virtual JZ_RESULT BlurImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param) = 0;
 	// 释放图像数据
 	virtual JZ_RESULT ReleaseImage(JZImageBuf* pImage) = 0;
 };
