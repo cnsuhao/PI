@@ -19,19 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="JZBaseImageProcess.cpp" />
+    <ClInclude Include="..\..\include\IJZImageSmooth.h" />
+    <ClInclude Include="..\..\include\IJZImageSmoothProc.h" />
+    <ClInclude Include="JZImageSmooth.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\IJZBaseImageProcess.h" />
-    <ClInclude Include="..\..\include\IJZBaseImageProcessProc.h" />
-    <ClInclude Include="..\..\include\JZAutoLoader.h" />
-    <ClInclude Include="..\..\include\JZAutoSetEnv.h" />
-    <ClInclude Include="..\..\include\JZCommonImageDef.h" />
-    <ClInclude Include="JZBaseImageProcess.h" />
+    <ClCompile Include="JZImageSmooth.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{94A5222D-2642-4E25-85F3-F22F2074456F}</ProjectGuid>
-    <RootNamespace>JZBaseImageProcess</RootNamespace>
+    <ProjectGuid>{D8B3AB0B-01F0-4E61-96CF-551682271E2D}</ProjectGuid>
+    <RootNamespace>JZImageSmooth</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -39,7 +36,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -52,7 +49,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -83,27 +80,27 @@
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
-    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
-    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
-    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
-    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,8 +110,8 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <ProgramDatabaseFile>$(SolutionDir)..\pdb\$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(SolutionDir)..\lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)../lib/$(Platform)/$(Configuration)/$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,8 +122,8 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <ProgramDatabaseFile>$(SolutionDir)..\pdb\$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(SolutionDir)..\lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)../lib/$(Platform)/$(Configuration)/$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,8 +138,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDatabaseFile>$(SolutionDir)..\pdb\$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(SolutionDir)..\lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
+      <ImportLibrary>$(SolutionDir)../lib/$(Platform)/$(Configuration)/$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -157,8 +154,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDatabaseFile>$(SolutionDir)..\pdb\$(Platform)\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(SolutionDir)..\lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(SolutionDir)../pdb/$(Platform)/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
+      <ImportLibrary>$(SolutionDir)../lib/$(Platform)/$(Configuration)/$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

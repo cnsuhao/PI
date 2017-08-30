@@ -9,12 +9,6 @@ enum JZ_RESULT
 	JZ_INVAILD_PARAM,
 };
 
-// 图像处理的一些基本的公共参数
-struct JZCommonParam
-{
-
-};
-
 // 像素格式，目前仅支持打包像素格式，分片像素格式以后扩展
 enum JZ_PIXEL_FMT
 {
@@ -39,6 +33,18 @@ struct JZImageBuf
 	int					width;			// 图像宽度
 	int					height;			// 图像高度
 
+};
+
+// 图像处理的一些基本的公共参数
+struct JZCommonParam
+{
+
+};
+
+struct JZImageProcessData
+{
+	JZImageBuf*		pSrcImage;			// 要进行图像处理的buffer
+	JZImageBuf*		pDesImage;			// 用于存储图像处理后的buffer
 };
 
 #endif // !__JZ_COMMONIMAGEDEF_H__

@@ -1,5 +1,5 @@
-#include "JZBaseImageProcess.h"
-
+#define BASEIMAGEPROCESS_EXPORTS
+#include <IJZBaseImageProcess.h>
 #include <opencv2\opencv.hpp>
 using namespace cv;
 
@@ -37,20 +37,6 @@ JZ_RESULT JZBaseImageProcess::ReadImage(IN const char* filename, OUT JZImageBuf*
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT JZBaseImageProcess::BlurImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param)
-{
-	// 高斯滤波
-	Mat srcImage(Size(psrc->width, psrc->height), CV_8UC3);
-	int iImageBytes = psrc->height * psrc->pitch;
-	memcpy_s(srcImage.data, iImageBytes, psrc->color, iImageBytes);
-
-	Mat desImage;
-	GaussianBlur(srcImage, desImage, Size(15, 15), 3, 3, BORDER_DEFAULT);
-	memcpy_s(pdes->color, iImageBytes, desImage.data, iImageBytes);
-
-	return JZ_SUCCESS;
-}
-
 JZ_RESULT JZBaseImageProcess::ReleaseImage(JZImageBuf* pImage)
 {
 	if (NULL != pImage && NULL != pImage->color)
@@ -62,6 +48,7 @@ JZ_RESULT JZBaseImageProcess::ReleaseImage(JZImageBuf* pImage)
 	return JZ_SUCCESS;
 }
 
+//////////////////////////////////////////导出的接口////////////////////////////////
 JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI) 
 {
 	*ppAPI = new JZBaseImageProcess();
@@ -72,19 +59,19 @@ JZ_RESULT ReleaseInterface(IJZBaseImageProcess* pAPI)
 {
 	if (NULL != pAPI)
 	{
-		delete pAPI;
+		delete (JZBaseImageProcess*)pAPI;
 		pAPI = NULL;
 	}
 	return JZ_SUCCESS;
 }
 
-JZBaseImageProcessAPI* g_pAPI;
+JZBaseImageProcessAPI* g_pBaseImageProcessAPI;
 extern "C" _declspec(dllexport) void* JZBIP_GetAPIStuPtr()
 {
 	static JZBaseImageProcessAPI temp = { 0 }; // 给静态变量分配的内存区域，只有在程序停止运行时，才会收回
 	
-	g_pAPI = &temp;
-	g_pAPI->pfnGetInterface = GetInterface;
-	g_pAPI->pfnReleaseInterface = ReleaseInterface;
-	return (void*)g_pAPI;
+	g_pBaseImageProcessAPI = &temp;
+	g_pBaseImageProcessAPI->pfnGetInterface = GetInterface;
+	g_pBaseImageProcessAPI->pfnReleaseInterface = ReleaseInterface;
+	return (void*)g_pBaseImageProcessAPI;
 }

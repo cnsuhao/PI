@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include <SOIL/SOIL.h>
 #include <IJZBaseImageProcessProc.h>
+#include <IJZImageSmoothProc.h>
 #include <IJZBaseRenderProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -121,7 +122,11 @@ BOOL CUIDialogDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	m_pScene = NULL;
 	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
-	
+	g_JZImageSmoothAPI->pfnGetInterface(&m_pBaseImageProcess);
+	static JZImageBuf src = { 0 };
+	static JZImageBuf des = { 0 };
+	m_imageProcessData.pSrcImage = &src;
+	m_imageProcessData.pDesImage = &des;
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
 	m_pScene->init(cwnd->m_hWnd);
 	
@@ -181,50 +186,32 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 void CUIDialogDlg::OnBnClickedButtonOpen()
 {
 	// TODO: Add your control notification handler code here
-
-	IJZBaseImageProcess* pBaseImageProcess = NULL;
-	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
-	JZImageBuf imageBuf = { 0 };
-	pBaseImageProcess->ReadImage("../../sys/images/test.jpg", &imageBuf);
-	m_pScene->SetLeftImage(&imageBuf);
-	pBaseImageProcess->ReleaseImage(&imageBuf);
-	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
+	m_pBaseImageProcess->ReadImage("../../sys/images/test.jpg", m_imageProcessData.pSrcImage);
+	m_imageProcessData.pDesImage->width = m_imageProcessData.pSrcImage->width;
+	m_imageProcessData.pDesImage->height = m_imageProcessData.pSrcImage->height;
+	m_imageProcessData.pDesImage->pixel_fmt = m_imageProcessData.pSrcImage->pixel_fmt;
+	m_imageProcessData.pDesImage->color = new unsigned char[m_imageProcessData.pSrcImage->height *  m_imageProcessData.pSrcImage->pitch];
+	m_imageProcessData.pDesImage->pitch = m_imageProcessData.pSrcImage->pitch;
+	m_pScene->SetLeftImage(m_imageProcessData.pSrcImage);
 }
 
 
 void CUIDialogDlg::OnBnClickedButtonClear()
 {
 	// TODO: Add your control notification handler code here
-	IJZBaseImageProcess* pBaseImageProcess = NULL;
-	JZ_RESULT res = g_JZBaseImageProcessAPI->pfnGetInterface(&pBaseImageProcess);
-	JZImageBuf srcImage = { 0 };
-	pBaseImageProcess->ReadImage("../../sys/images/test.jpg", &srcImage);
-	JZImageBuf desImage = { 0 };
-	desImage.width = srcImage.width;
-	desImage.height = srcImage.height;
-	desImage.pixel_fmt = JZ_PIXFMT_BGR;
-	desImage.color = new unsigned char[srcImage.height * srcImage.pitch];
-	desImage.pitch = srcImage.pitch;
-	pBaseImageProcess->BlurImage(&srcImage, &desImage, NULL);
-	m_pScene->SetRightImage(&desImage);
-	pBaseImageProcess->ReleaseImage(&srcImage);
-	delete[] desImage.color;
-	g_JZBaseImageProcessAPI->pfnReleaseInterface(pBaseImageProcess);
+	//m_pBaseImageProcess->BlurImage(m_imageProcessData.pSrcImage, m_imageProcessData.pDesImage, NULL);
+	m_pBaseImageProcess->ProcessImage(&m_imageProcessData, NULL);
+	m_pScene->SetRightImage(m_imageProcessData.pDesImage);
+	
 }
-
-
-//void CUIDialogDlg::OnClose()
-//{
-//	// TODO: Add your message handler code here and/or call default
-//
-//	CDialogEx::OnClose();
-//}
-
 
 void CUIDialogDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
 	// TODO: Add your message handler code here
+	delete[] m_imageProcessData.pDesImage->color;
+	m_pBaseImageProcess->ReleaseImage(m_imageProcessData.pSrcImage);
 	g_JZBaseRenderAPI->pfnReleaseSceneInterface(m_pScene);
+	g_JZBaseImageProcessAPI->pfnReleaseInterface(m_pBaseImageProcess);
 }

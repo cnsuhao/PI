@@ -4,6 +4,7 @@
 
 #pragma once
 #include <IJZBaseRender.h>
+#include <IJZBaseImageProcess.h>
 
 // CUIDialogDlg 对话框
 class CUIDialogDlg : public CDialogEx
@@ -25,6 +26,8 @@ public:
 protected:
 	HICON m_hIcon;
 	IJZScene* m_pScene;
+	JZImageProcessData m_imageProcessData;
+	IJZBaseImageProcess* m_pBaseImageProcess;
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -34,6 +37,5 @@ protected:
 public:
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonClear();
-//	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 };
