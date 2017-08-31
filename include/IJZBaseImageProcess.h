@@ -22,10 +22,10 @@
 class IJZBaseImageProcess
 {
 public:
-	// 写图像
-	virtual JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param) = 0;
 	// 读图像，调用了ReadImage()函数，就要调用ReleaseImage()函数进行释放
 	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage) = 0;
+	// 写图像
+	virtual JZ_RESULT WriteImage(JZImageBuf* pImageBuf, const char* filename) = 0;
 	// 处理图像
 	virtual JZ_RESULT ProcessImage(JZImageProcessData* pImageProcessData, JZCommonParam* pParam) = 0;
 	// 释放图像数据
@@ -39,10 +39,10 @@ public:
 	JZBaseImageProcess();
 	// 析构函数
 	~JZBaseImageProcess();
-	// 写图像
-	virtual JZ_RESULT WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param);
 	// 读图像，调用了ReadImage()函数，就要调用ReleaseImage()函数进行释放
 	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage);
+	// 写图像
+	virtual JZ_RESULT WriteImage(JZImageBuf* pImageBuf, const char* filename);
 	// 处理图像
 	virtual JZ_RESULT ProcessImage(JZImageProcessData* pImageProcessData, JZCommonParam* pParam) { return JZ_SUCCESS; }
 	// 释放图像数据

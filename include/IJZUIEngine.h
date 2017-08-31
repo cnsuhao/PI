@@ -30,6 +30,8 @@ public:
 	virtual JZ_RESULT ReleaseImageProcessPlugin() = 0;
 	// 设置要处理的图像数据
 	virtual JZ_RESULT SetImageData(const char* filename) = 0;
+	// 将处理后的图像数据保存为图片
+	virtual JZ_RESULT SaveImageData(const char* filename) = 0;
 	// 释放图像数据
 	virtual JZ_RESULT ReleaseImageData() = 0;
 	// 设置图像处理的参数

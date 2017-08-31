@@ -12,11 +12,6 @@ using namespace cv;
 JZBaseImageProcess::JZBaseImageProcess() {}
 JZBaseImageProcess::~JZBaseImageProcess() {}
 
-JZ_RESULT JZBaseImageProcess::WriteImage(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param)
-{
-	return JZ_SUCCESS; 
-}
-
 JZ_RESULT JZBaseImageProcess::ReadImage(IN const char* filename, OUT JZImageBuf* pImage)
 {
 	String strFilename(filename);
@@ -34,6 +29,20 @@ JZ_RESULT JZBaseImageProcess::ReadImage(IN const char* filename, OUT JZImageBuf*
 	int iImageBytes = pImage->height * pImage->pitch;
 	pImage->color = new byte[iImageBytes];
 	memcpy_s(pImage->color, iImageBytes, image.data, iImageBytes);
+	return JZ_SUCCESS;
+}
+
+JZ_RESULT JZBaseImageProcess::WriteImage(JZImageBuf* pImageBuf, const char* filename)
+{
+	if (NULL == pImageBuf || NULL == pImageBuf->color)
+	{
+		return JZ_FAILED;
+	}
+
+	Mat image(Size(pImageBuf->width, pImageBuf->height), CV_8UC3);
+	int iImageBytes = pImageBuf->height * pImageBuf->pitch;
+	memcpy_s(image.data, iImageBytes, pImageBuf->color, iImageBytes);
+	imwrite(filename, image);
 	return JZ_SUCCESS;
 }
 

@@ -142,6 +142,13 @@ JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 	return JZ_SUCCESS;
 }
 
+// 将处理后的图像数据保存为图片
+JZ_RESULT JZUIEngine::SaveImageData(const char* filename)
+{
+	m_pBaseImageProcess->WriteImage(m_imageProcessData.pDesImage, filename);
+	return JZ_SUCCESS;
+}
+
 JZ_RESULT JZUIEngine::ReleaseImageData()
 {
 	if (NULL != m_imageProcessData.pDesImage->color)
