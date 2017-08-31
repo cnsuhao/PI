@@ -94,7 +94,7 @@ JZDevice::~JZDevice()
 	Release();
 }
 
-JZResType JZDevice::GetResType()
+JZ_RES_TYPE JZDevice::GetResType()
 {
 	return JZ_RES_DEVICE;
 }

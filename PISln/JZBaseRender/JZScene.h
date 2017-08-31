@@ -2,7 +2,7 @@
 #define SCENE_H
 #include "IJZBaseRender.h"
 
-class JZScene: public IJZScene
+class JZScene: public IJZSceneRender
 {
 public:
 	// ¹¹Ôìº¯Êý

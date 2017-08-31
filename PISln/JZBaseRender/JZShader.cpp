@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <tchar.h>
 
 #pragma comment(lib, "opengl32.lib")
 #ifdef _DEBUG
@@ -28,25 +29,52 @@ JZShader::JZShader()
 	m_strGeometry = "";		// 几何着色器代码
 }
 
-JZShader::JZShader(const char** shaderPath, int iShaderNums)
+JZShader::JZShader(const char** shaderName, int iShaderNums)
 {
 	// 输入参数检查
-	if (NULL == shaderPath || NULL == *shaderPath || iShaderNums <= 1)
+	if (NULL == shaderName || NULL == *shaderName || iShaderNums <= 1)
 	{
 		return;
 	}
 
 	// 从字符串数组中分离出各个着色器路径
-	const char* vertexPath = NULL;
-	const char* fragmentPath = NULL;
-	const char* geometryPath = NULL;
+	TCHAR st_top[MAX_PATH] = { 0 };
+	st_top[0] = '\0';
+	char s_top[MAX_PATH] = { 0 };
+	GetModuleFileName(NULL, st_top, MAX_PATH - 1);
+#ifdef UNICODE
+	WideCharToMultiByte(CP_ACP, 0, st_top, -1, s_top, MAX_PATH, NULL, NULL);
+#else
+	strcpy(s_top, st_top);
+#endif // UNICODE
+
+	char* p_separator = NULL;
+	for (int i = 0; i < 4; i++)
+	{
+		p_separator = strrchr(s_top, _T('\\'));
+		if (NULL == p_separator)
+		{
+			return ;
+		}
+		*p_separator = '\0';
+	}
+	strcat(s_top, "\\");
+	strcat(s_top, "sys\\shaders\\");
+
+	char vertexPath[MAX_PATH] = { 0 };
+	char fragmentPath[MAX_PATH] = { 0 };
+	char geometryPath[MAX_PATH] = { 0 };
+	strcpy(vertexPath, s_top);
+	strcpy(fragmentPath, s_top);
+	strcpy(geometryPath, s_top);
+
 	if (iShaderNums >= 2)
 	{
-		vertexPath = shaderPath[0];
-		fragmentPath = shaderPath[1];
+		strcat(vertexPath, shaderName[0]);
+		strcat(fragmentPath, shaderName[1]);
 		if (iShaderNums >= 3)
 		{
-			geometryPath = shaderPath[2];
+			strcat(geometryPath, shaderName[2]);
 		}
 	}
 
@@ -64,7 +92,7 @@ JZShader::~JZShader()
 	Release();
 }
 
-JZResType JZShader::GetResType()
+JZ_RES_TYPE JZShader::GetResType()
 {
 	return JZ_RES_SHADER;
 }
@@ -84,25 +112,52 @@ void JZShader::UnUse()
 }
 
 // shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、像素着色器
-JZ_RESULT JZShader::Create(const char** shaderPath, int iShaderNums)
+JZ_RESULT JZShader::Create(const char** shaderName, int iShaderNums)
 {
 	// 输入参数检查
-	if (NULL == shaderPath || NULL == *shaderPath || iShaderNums <=1)
+	if (NULL == shaderName || NULL == *shaderName || iShaderNums <=1)
 	{
 		return JZ_FAILED;
 	}
 
 	// 从字符串数组中分离出各个着色器路径
-	const char* vertexPath = NULL;
-	const char* fragmentPath = NULL;
-	const char* geometryPath = NULL;
+	TCHAR st_top[MAX_PATH] = { 0 };
+	st_top[0] = '\0';
+	char s_top[MAX_PATH] = { 0 };
+	GetModuleFileName(NULL, st_top, MAX_PATH - 1);
+#ifdef UNICODE
+	WideCharToMultiByte(CP_ACP, 0, st_top, -1, s_top, MAX_PATH, NULL, NULL);
+#else
+	strcpy(s_top, st_top);
+#endif // UNICODE
+
+	char* p_separator = NULL;
+	for (int i = 0; i < 4; i++)
+	{
+		p_separator = strrchr(s_top, _T('\\'));
+		if (NULL == p_separator)
+		{
+			return JZ_FAILED;
+		}
+		*p_separator = '\0';
+	}
+	strcat(s_top, "\\");
+	strcat(s_top, "sys\\shaders\\");
+
+	char vertexPath[MAX_PATH] = { 0 };
+	char fragmentPath[MAX_PATH] = { 0 };
+	char geometryPath[MAX_PATH] = { 0 };
+	strcpy(vertexPath, s_top);
+	strcpy(fragmentPath, s_top);
+	strcpy(geometryPath, s_top);
+
 	if (iShaderNums >= 2)
 	{
-		vertexPath = shaderPath[0]; 
-		fragmentPath = shaderPath[1];
+		strcat(vertexPath, shaderName[0]);
+		strcat(fragmentPath, shaderName[1]);
 		if (iShaderNums >= 3)
 		{
-			geometryPath = shaderPath[2];
+			strcat(geometryPath, shaderName[2]);
 		}
 	}
 	

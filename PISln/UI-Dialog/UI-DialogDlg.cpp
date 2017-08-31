@@ -7,9 +7,10 @@
 #include "UI-DialogDlg.h"
 #include "afxdialogex.h"
 #include <SOIL/SOIL.h>
-#include <IJZBaseImageProcessProc.h>
-#include <IJZImageSmoothProc.h>
-#include <IJZBaseRenderProc.h>
+//#include <IJZBaseImageProcessProc.h>
+//#include <IJZImageSmoothProc.h>
+//#include <IJZBaseRenderProc.h>
+#include <IJZUIEngineProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -120,15 +121,18 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	m_pScene = NULL;
+	/*m_pScene = NULL;
 	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
 	g_JZImageSmoothAPI->pfnGetInterface(&m_pBaseImageProcess);
 	static JZImageBuf src = { 0 };
 	static JZImageBuf des = { 0 };
 	m_imageProcessData.pSrcImage = &src;
-	m_imageProcessData.pDesImage = &des;
+	m_imageProcessData.pDesImage = &des;*/
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
-	m_pScene->init(cwnd->m_hWnd);
+	//m_pScene->init(cwnd->m_hWnd);
+	m_pUIEngine = NULL;
+	g_JZUIEngineAPI->pfnGetInterface(&m_pUIEngine);
+	m_pUIEngine->Init(cwnd->m_hWnd);
 	
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -172,7 +176,8 @@ void CUIDialogDlg::OnPaint()
 	else
 	{
 		//CDialogEx::OnPaint();
-		m_pScene->RenderScene();
+		//m_pScene->RenderScene();
+		m_pUIEngine->Render();
 	}
 }
 
@@ -186,22 +191,23 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 void CUIDialogDlg::OnBnClickedButtonOpen()
 {
 	// TODO: Add your control notification handler code here
-	m_pBaseImageProcess->ReadImage("../../sys/images/test.jpg", m_imageProcessData.pSrcImage);
+	/*m_pBaseImageProcess->ReadImage("E:/GitCode/PI/sys/images/test.jpg", m_imageProcessData.pSrcImage);
 	m_imageProcessData.pDesImage->width = m_imageProcessData.pSrcImage->width;
 	m_imageProcessData.pDesImage->height = m_imageProcessData.pSrcImage->height;
 	m_imageProcessData.pDesImage->pixel_fmt = m_imageProcessData.pSrcImage->pixel_fmt;
 	m_imageProcessData.pDesImage->color = new unsigned char[m_imageProcessData.pSrcImage->height *  m_imageProcessData.pSrcImage->pitch];
 	m_imageProcessData.pDesImage->pitch = m_imageProcessData.pSrcImage->pitch;
-	m_pScene->SetLeftImage(m_imageProcessData.pSrcImage);
+	m_pScene->SetLeftImage(m_imageProcessData.pSrcImage);*/
+	m_pUIEngine->SetImageData("E:/GitCode/PI/sys/images/test.jpg");
 }
 
 
 void CUIDialogDlg::OnBnClickedButtonClear()
 {
 	// TODO: Add your control notification handler code here
-	//m_pBaseImageProcess->BlurImage(m_imageProcessData.pSrcImage, m_imageProcessData.pDesImage, NULL);
-	m_pBaseImageProcess->ProcessImage(&m_imageProcessData, NULL);
-	m_pScene->SetRightImage(m_imageProcessData.pDesImage);
+	/*m_pBaseImageProcess->ProcessImage(&m_imageProcessData, NULL);
+	m_pScene->SetRightImage(m_imageProcessData.pDesImage);*/
+	m_pUIEngine->ProcessImage(JZ_IMAGE_SMOOTH);
 	
 }
 
@@ -210,8 +216,10 @@ void CUIDialogDlg::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	// TODO: Add your message handler code here
-	delete[] m_imageProcessData.pDesImage->color;
+	/*delete[] m_imageProcessData.pDesImage->color;
 	m_pBaseImageProcess->ReleaseImage(m_imageProcessData.pSrcImage);
 	g_JZBaseRenderAPI->pfnReleaseSceneInterface(m_pScene);
-	g_JZBaseImageProcessAPI->pfnReleaseInterface(m_pBaseImageProcess);
+	g_JZImageSmoothAPI->pfnReleaseInterface(m_pBaseImageProcess);*/
+	m_pUIEngine->ReleaseImageData();
+	m_pUIEngine->Release();
 }

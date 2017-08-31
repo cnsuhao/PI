@@ -10,7 +10,7 @@ public:
 	// 析构函数
 	~JZTexture();
 	// 获取资源类型
-	virtual JZResType GetResType();		
+	virtual JZ_RES_TYPE GetResType();		
 	// 创建纹理资源，目前仅支持RGB图像
 	virtual JZ_RESULT Create(JZImageBuf* pImageBuf);	
 	// 释放纹理资源

@@ -12,7 +12,7 @@ public:
 	// 析构函数
 	~JZDevice();
 	// 获取资源类型
-	virtual JZResType GetResType();
+	virtual JZ_RES_TYPE GetResType();
 	// 创建设备资源
 	virtual JZ_RESULT Create(HWND hWnd, HDC hDC = NULL, HGLRC hShareRC = NULL);
 	// 释放设备资源

@@ -37,7 +37,7 @@ JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI)
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT ReleaseInterface(IJZBaseImageProcess* pAPI)
+JZ_RESULT ReleaseInterface(IJZBaseImageProcess*& pAPI)
 {
 	if (NULL != pAPI)
 	{

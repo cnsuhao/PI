@@ -91,7 +91,7 @@ JZ_RESULT JZScene::SetDevice(HWND hWnd)
 void JZScene::SetShader()
 {
 	// shader资源
-	const char* shaderPath[2] = { "../../sys/shaders/texture.vert", "../../sys/shaders/texture.frag" };
+	const char* shaderPath[2] = { "texture.vert", "texture.frag" };
 	int iShaderNums = 2;
 	m_pShader->Create(shaderPath, iShaderNums);
 }
@@ -279,19 +279,19 @@ void JZScene::Release()
 
 
 ///////////////////////////////////接口导出////////////////////////////////
-extern "C" _declspec(dllexport) IJZScene* GetSceneAPI()
+extern "C" _declspec(dllexport) IJZSceneRender* GetSceneAPI()
 {
 	static JZScene scene;
 	return &scene;
 }
 
-JZ_RESULT GetSceneInterface(IJZScene** ppScene)
+JZ_RESULT GetSceneInterface(IJZSceneRender** ppScene)
 {
 	*ppScene = new JZScene();
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT ReleaseSceneInterface(IJZScene* pScene)
+JZ_RESULT ReleaseSceneInterface(IJZSceneRender*& pScene)
 {
 	if (NULL != pScene)
 	{

@@ -3,8 +3,10 @@
 //
 
 #pragma once
-#include <IJZBaseRender.h>
-#include <IJZBaseImageProcess.h>
+
+//#include <IJZBaseRender.h>
+//#include <IJZBaseImageProcess.h>
+#include <IJZUIEngine.h>
 
 // CUIDialogDlg 对话框
 class CUIDialogDlg : public CDialogEx
@@ -25,9 +27,11 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
-	IJZScene* m_pScene;
+	/*IJZSceneRender* m_pScene;
 	JZImageProcessData m_imageProcessData;
-	IJZBaseImageProcess* m_pBaseImageProcess;
+	IJZBaseImageProcess* m_pBaseImageProcess;*/
+	IJZUIEngine* m_pUIEngine;
+
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);

@@ -4,6 +4,7 @@
 // 返回结果定义
 enum JZ_RESULT
 {
+	JZ_UNKNOW = -1,
 	JZ_SUCCESS,
 	JZ_FAILED,
 	JZ_INVAILD_PARAM,
@@ -38,7 +39,16 @@ struct JZImageBuf
 // 图像处理的一些基本的公共参数
 struct JZCommonParam
 {
+	int size;
+	JZCommonParam()
+	{
+		size = 2;
+	}
 
+	~JZCommonParam()
+	{
+		size = 0;
+	}
 };
 
 struct JZImageProcessData

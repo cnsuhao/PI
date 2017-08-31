@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <Windows.h>
 
-enum JZResType
+enum JZ_RES_TYPE
 {
 	JZ_RES_UNKNOW,
 	JZ_RES_DEVICE,			// OpenGL设备资源
@@ -39,7 +39,7 @@ class IJZBaseRes
 {
 public:
 	// 获取资源类型
-	virtual JZResType GetResType() = 0;	
+	virtual JZ_RES_TYPE GetResType() = 0;	
 };
 
 class IJZBaseRender
@@ -54,7 +54,7 @@ class IJZDevice : public IJZBaseRes
 {
 public:
 	// 获取资源类型
-	virtual JZResType GetResType() = 0;
+	virtual JZ_RES_TYPE GetResType() = 0;
 	// 创建设备资源
 	virtual JZ_RESULT Create(HWND hWnd, HDC hDC = NULL, HGLRC hShareRC = NULL) = 0;
 	// 释放设备资源
@@ -70,13 +70,13 @@ class IJZShader: public IJZBaseRes
 {
 public:
 	// 获取资源类型
-	virtual JZResType GetResType() = 0;
+	virtual JZ_RES_TYPE GetResType() = 0;
 	// 使用着色器程序
 	virtual void Use() = 0;
 	// 解除使用着色器程序
 	virtual void UnUse() = 0;
-	// shaderPath表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、几何着色器的顺序排列
-	virtual JZ_RESULT Create(const char** shaderPath, int iShaderNums) = 0;
+	// shaderName表示包含了shader路径的字符串数组，iShaderNums表示该字符串数组包含了几个shader路径，字符串数组应该按照顶点着色器、片段着色器、几何着色器的顺序排列
+	virtual JZ_RESULT Create(const char** shaderName, int iShaderNums) = 0;
 	// 获取着色器程序ID
 	virtual unsigned int GetProgramID() = 0;
 	// 释放着色器程序
@@ -88,7 +88,7 @@ class IJZTexture: public IJZBaseRes
 {
 public:
 	// 获取资源类型
-	virtual JZResType GetResType() = 0;
+	virtual JZ_RES_TYPE GetResType() = 0;
 	// 创建纹理资源，目前仅支持RGB图像
 	virtual JZ_RESULT Create(JZImageBuf* pImageBuf) = 0;	
 	// 释放纹理资源
@@ -108,7 +108,7 @@ class IJZMesh: public IJZBaseRes
 {
 public:
 	// 获取资源类型
-	virtual JZResType GetResType() = 0;
+	virtual JZ_RES_TYPE GetResType() = 0;
 	// 创建网格资源
 	virtual JZ_RESULT Create(std::vector<Vertex> vertexSet, std::vector<unsigned int> indexSet, JZ_DRAW_UNIT drawUnit, JZ_DRAW_METHOD drawMethod) = 0;
 	// 创建用于显示图像的网格资源
@@ -122,7 +122,7 @@ public:
 };
 
 //
-class IJZScene: public IJZBaseRender
+class IJZSceneRender: public IJZBaseRender
 {
 public:
 	// 设置OpenGL设备
@@ -143,8 +143,8 @@ public:
 	virtual void Release() = 0;
 };
 
-typedef JZ_RESULT(*DefGetSceneInterface)(IJZScene** ppScene);
-typedef JZ_RESULT(*DefReleaseSceneInterface)(IJZScene* pScene);
+typedef JZ_RESULT(*DefGetSceneInterface)(IJZSceneRender** ppScene);
+typedef JZ_RESULT(*DefReleaseSceneInterface)(IJZSceneRender*& pScene);
 
 struct JZBaseRenderAPI
 {

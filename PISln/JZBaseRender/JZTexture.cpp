@@ -30,7 +30,7 @@ JZTexture::~JZTexture()
 	Release();
 }
 
-JZResType JZTexture::GetResType()
+JZ_RES_TYPE JZTexture::GetResType()
 {
 	return JZ_RES_TEX;
 }

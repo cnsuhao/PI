@@ -50,14 +50,14 @@ public:
 
 };
 
-typedef JZ_RESULT(*DefGetInterface)(IJZBaseImageProcess** ppAPI);
-typedef JZ_RESULT(*DefReleaseInterface)(IJZBaseImageProcess* pAPI);
+typedef JZ_RESULT(*DefGetBaseImageInterface)(IJZBaseImageProcess** ppAPI);
+typedef JZ_RESULT(*DefReleaseBaseImageInterface)(IJZBaseImageProcess*& pAPI);
 
 // 供外部调用的接口声明
 struct JZBaseImageProcessAPI
 {
-	DefGetInterface pfnGetInterface;
-	DefReleaseInterface pfnReleaseInterface;
+	DefGetBaseImageInterface pfnGetInterface;
+	DefReleaseBaseImageInterface pfnReleaseInterface;
 };
 
 #endif

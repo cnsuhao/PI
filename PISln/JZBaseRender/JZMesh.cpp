@@ -32,7 +32,7 @@ JZMesh::~JZMesh()
 	Release();
 }
 
-JZResType JZMesh::GetResType()
+JZ_RES_TYPE JZMesh::GetResType()
 {
 	return JZ_RES_MESH;
 }

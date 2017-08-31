@@ -10,7 +10,7 @@ public:
 	// 析构函数
 	~JZMesh();
 	// 获取资源类型
-	virtual JZResType GetResType();
+	virtual JZ_RES_TYPE GetResType();
 	// 创建网格资源
 	virtual JZ_RESULT Create(std::vector<Vertex> vertexSet, std::vector<unsigned int> indexSet, JZ_DRAW_UNIT drawUnit, JZ_DRAW_METHOD drawMethod);
 	// 创建用于显示图像的网格资源
