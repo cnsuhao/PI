@@ -4,8 +4,6 @@
 
 #pragma once
 
-//#include <IJZBaseRender.h>
-//#include <IJZBaseImageProcess.h>
 #include <IJZUIEngine.h>
 
 // CUIDialogDlg 对话框
@@ -27,9 +25,6 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
-	/*IJZSceneRender* m_pScene;
-	JZImageProcessData m_imageProcessData;
-	IJZBaseImageProcess* m_pBaseImageProcess;*/
 	IJZUIEngine* m_pUIEngine;
 
 	// 生成的消息映射函数
@@ -40,6 +35,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedButtonOpen();
-	afx_msg void OnBnClickedButtonClear();
+	afx_msg void OnBnClickedButtonSmooth();
 	afx_msg void OnDestroy();
+	afx_msg void OnBnClickedButtonSave();
 };

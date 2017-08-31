@@ -6,29 +6,10 @@
 #include "UI-Dialog.h"
 #include "UI-DialogDlg.h"
 #include "afxdialogex.h"
-#include <SOIL/SOIL.h>
-//#include <IJZBaseImageProcessProc.h>
-//#include <IJZImageSmoothProc.h>
-//#include <IJZBaseRenderProc.h>
 #include <IJZUIEngineProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#pragma comment(lib, "opengl32.lib")
-#ifdef _DEBUG
-#	ifdef _WIN64
-#		pragma comment(lib, "SOIL64s_d.lib")
-#	else
-#		pragma comment(lib, "SOIL32s_d.lib")
-#	endif
-#else
-#	ifdef _WIN64
-#		pragma comment(lib, "SOIL64s.lib")
-#	else
-#		pragma comment(lib, "SOIL32s.lib")
-#	endif
-#endif // _DEBUG
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -37,12 +18,12 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 对话框数据
+	// 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 // 实现
@@ -83,9 +64,9 @@ BEGIN_MESSAGE_MAP(CUIDialogDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CUIDialogDlg::OnBnClickedButtonOpen)
-	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CUIDialogDlg::OnBnClickedButtonClear)
-//	ON_WM_CLOSE()
-ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_SMOOTH, &CUIDialogDlg::OnBnClickedButtonSmooth)
+	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CUIDialogDlg::OnBnClickedButtonSave)
 END_MESSAGE_MAP()
 
 
@@ -121,19 +102,11 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	/*m_pScene = NULL;
-	g_JZBaseRenderAPI->pfnGetSceneInterface(&m_pScene);
-	g_JZImageSmoothAPI->pfnGetInterface(&m_pBaseImageProcess);
-	static JZImageBuf src = { 0 };
-	static JZImageBuf des = { 0 };
-	m_imageProcessData.pSrcImage = &src;
-	m_imageProcessData.pDesImage = &des;*/
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
-	//m_pScene->init(cwnd->m_hWnd);
 	m_pUIEngine = NULL;
 	g_JZUIEngineAPI->pfnGetInterface(&m_pUIEngine);
 	m_pUIEngine->Init(cwnd->m_hWnd);
-	
+
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -176,7 +149,6 @@ void CUIDialogDlg::OnPaint()
 	else
 	{
 		//CDialogEx::OnPaint();
-		//m_pScene->RenderScene();
 		m_pUIEngine->Render();
 	}
 }
@@ -191,24 +163,33 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 void CUIDialogDlg::OnBnClickedButtonOpen()
 {
 	// TODO: Add your control notification handler code here
-	/*m_pBaseImageProcess->ReadImage("E:/GitCode/PI/sys/images/test.jpg", m_imageProcessData.pSrcImage);
-	m_imageProcessData.pDesImage->width = m_imageProcessData.pSrcImage->width;
-	m_imageProcessData.pDesImage->height = m_imageProcessData.pSrcImage->height;
-	m_imageProcessData.pDesImage->pixel_fmt = m_imageProcessData.pSrcImage->pixel_fmt;
-	m_imageProcessData.pDesImage->color = new unsigned char[m_imageProcessData.pSrcImage->height *  m_imageProcessData.pSrcImage->pitch];
-	m_imageProcessData.pDesImage->pitch = m_imageProcessData.pSrcImage->pitch;
-	m_pScene->SetLeftImage(m_imageProcessData.pSrcImage);*/
-	m_pUIEngine->SetImageData("E:/GitCode/PI/sys/images/test.jpg");
+	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
+	CFileDialog fileDlg(TRUE, _T("jpg"), 0, 0, lpszFilter, this);
+
+	CString cstrFilePath;
+	if (IDOK == fileDlg.DoModal())
+	{
+		cstrFilePath = fileDlg.GetPathName();
+		SetDlgItemText(IDC_STATIC_FILE, cstrFilePath);
+	}
+
+	TCHAR* tfilename = cstrFilePath.GetBuffer(0);
+	char filename[MAX_PATH] = { 0 };
+#ifdef UNICODE
+	int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
+#else
+	strcpy(filename, tfilename);
+#endif // UNICODE
+	m_pUIEngine->SetImageData(filename);
 }
 
 
-void CUIDialogDlg::OnBnClickedButtonClear()
+void CUIDialogDlg::OnBnClickedButtonSmooth()
 {
 	// TODO: Add your control notification handler code here
-	/*m_pBaseImageProcess->ProcessImage(&m_imageProcessData, NULL);
-	m_pScene->SetRightImage(m_imageProcessData.pDesImage);*/
 	m_pUIEngine->ProcessImage(JZ_IMAGE_SMOOTH);
-	
+
 }
 
 void CUIDialogDlg::OnDestroy()
@@ -216,10 +197,32 @@ void CUIDialogDlg::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	// TODO: Add your message handler code here
-	/*delete[] m_imageProcessData.pDesImage->color;
-	m_pBaseImageProcess->ReleaseImage(m_imageProcessData.pSrcImage);
-	g_JZBaseRenderAPI->pfnReleaseSceneInterface(m_pScene);
-	g_JZImageSmoothAPI->pfnReleaseInterface(m_pBaseImageProcess);*/
 	m_pUIEngine->ReleaseImageData();
 	m_pUIEngine->Release();
+}
+
+
+void CUIDialogDlg::OnBnClickedButtonSave()
+{
+	// TODO: Add your control notification handler code here
+	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
+	CFileDialog fileDlg(FALSE, _T("jpg"), _T("SaveImage"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, lpszFilter, this);
+
+	CString cstrFilePath;
+	if (IDOK == fileDlg.DoModal())
+	{
+		cstrFilePath = fileDlg.GetPathName();
+		SetDlgItemText(IDC_STATIC_SAVE, cstrFilePath);
+	}
+
+	TCHAR* tfilename = cstrFilePath.GetBuffer(0);
+	char filename[MAX_PATH] = { 0 };
+#ifdef UNICODE
+	int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
+#else
+	strcpy(filename, tfilename);
+#endif // UNICODE
+
+	m_pUIEngine->SaveImageData(filename);
 }
