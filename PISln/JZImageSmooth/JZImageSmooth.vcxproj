@@ -77,27 +77,27 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
+    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
+    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
+    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)/</OutDir>
+    <OutDir>$(SolutionDir)../dll/$(Platform)/$(Configuration)</OutDir>
     <IntDir>$(SolutionDir)../Intermediate/$(Platform)/$(Configuration)/$(ProjectName)</IntDir>
     <IncludePath>../../include;../../include/OpenCV;$(IncludePath)</IncludePath>
     <LibraryPath>../../lib/Import_lib/OpenCV/$(Platform)/$(Configuration);../../lib/$(Platform)/$(Configuration);$(LibraryPath)</LibraryPath>

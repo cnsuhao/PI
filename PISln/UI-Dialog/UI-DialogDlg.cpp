@@ -52,6 +52,7 @@ CUIDialogDlg::CUIDialogDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_UIDIALOG_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_pApp = (CUIDialogApp*)AfxGetApp();
 }
 
 void CUIDialogDlg::DoDataExchange(CDataExchange* pDX)
@@ -63,10 +64,13 @@ BEGIN_MESSAGE_MAP(CUIDialogDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CUIDialogDlg::OnBnClickedButtonOpen)
 	ON_BN_CLICKED(IDC_BUTTON_SMOOTH, &CUIDialogDlg::OnBnClickedButtonSmooth)
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CUIDialogDlg::OnBnClickedButtonSave)
+	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BUTTON_PROCESS, &CUIDialogDlg::OnBnClickedButtonProcess)
+	ON_COMMAND(ID_MENU_OPEN, &CUIDialogDlg::OnMenuOpen)
+	ON_COMMAND(ID_MENU_SAVE, &CUIDialogDlg::OnMenuSave)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -102,10 +106,14 @@ BOOL CUIDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	GetClientRect(m_rect);
+	m_menu.LoadMenu(IDR_MENU);
+	SetMenu(&m_menu);
+
+	SetTimer(1, 10, NULL);	// 每隔10ms调用一次OnTimer()函数
 	CWnd* cwnd = GetDlgItem(IDC_STATIC_PIC);
-	m_pUIEngine = NULL;
-	g_JZUIEngineAPI->pfnGetInterface(&m_pUIEngine);
-	m_pUIEngine->Init(cwnd->m_hWnd);
+	g_JZUIEngineAPI->pfnGetInterface(&m_pApp->m_pUIEngine);
+	m_pApp->m_pUIEngine->Init(cwnd->m_hWnd);
 
 	return FALSE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -148,8 +156,7 @@ void CUIDialogDlg::OnPaint()
 	}
 	else
 	{
-		//CDialogEx::OnPaint();
-		m_pUIEngine->Render();
+		CDialogEx::OnPaint();		
 	}
 }
 
@@ -160,36 +167,40 @@ HCURSOR CUIDialogDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CUIDialogDlg::OnBnClickedButtonOpen()
+void CUIDialogDlg::ChangeSize(CWnd* pCWnd, int cx, int cy)
 {
-	// TODO: Add your control notification handler code here
-	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
-	CFileDialog fileDlg(TRUE, _T("jpg"), 0, 0, lpszFilter, this);
-
-	CString cstrFilePath;
-	if (IDOK == fileDlg.DoModal())
+	if (NULL != pCWnd)
 	{
-		cstrFilePath = fileDlg.GetPathName();
-		SetDlgItemText(IDC_STATIC_FILE, cstrFilePath);
+		CRect rect;
+		pCWnd->GetWindowRect(&rect);// 获取控件变化前大小
+		ScreenToClient(&rect);	
+		rect.left = rect.left * (cx / m_rect.Width());
+		rect.right = rect.right * (cx / m_rect.Width());
+		rect.top = rect.top * (cy / m_rect.Height());
+		rect.bottom = rect.bottom * (cy / m_rect.Height());
+		pCWnd->MoveWindow(&rect);
 	}
-
-	TCHAR* tfilename = cstrFilePath.GetBuffer(0);
-	char filename[MAX_PATH] = { 0 };
-#ifdef UNICODE
-	int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
-#else
-	strcpy(filename, tfilename);
-#endif // UNICODE
-	m_pUIEngine->SetImageData(filename);
 }
 
-
-void CUIDialogDlg::OnBnClickedButtonSmooth()
+void CUIDialogDlg::OnBnClickedButtonSmooth()	// 通过此按钮打开图像模糊参数设置面板
 {
 	// TODO: Add your control notification handler code here
-	m_pUIEngine->ProcessImage(JZ_IMAGE_SMOOTH);
+	// 模态对话框
+	if (NULL == m_pSmoothDialog)
+	{
+		m_pSmoothDialog = new CDialogSmooth();
+	}
+	m_pSmoothDialog->DoModal();
 
+	// 非模态对话框
+	//if (NULL == m_pSmoothDialog)
+	//{
+	//	m_pSmoothDialog = new CDialogSmooth();
+	//	m_pSmoothDialog->Create(IDD_DIALOG_SMOOTH, this);
+	//}
+	//m_pSmoothDialog->ShowWindow(SW_SHOW);
+
+	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_SMOOTH);
 }
 
 void CUIDialogDlg::OnDestroy()
@@ -197,32 +208,101 @@ void CUIDialogDlg::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	// TODO: Add your message handler code here
-	m_pUIEngine->ReleaseImageData();
-	m_pUIEngine->Release();
+	if (NULL != m_pSmoothDialog)
+	{
+		delete m_pSmoothDialog;
+		m_pSmoothDialog = NULL;
+	}
+	m_pApp->m_pUIEngine->Release();
+}
+
+void CUIDialogDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	m_pApp->m_pUIEngine->Render();
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CUIDialogDlg::OnBnClickedButtonProcess()
+{
+	// TODO: Add your control notification handler code here
+	m_pApp->m_pUIEngine->ProcessImage();
 }
 
 
-void CUIDialogDlg::OnBnClickedButtonSave()
+void CUIDialogDlg::OnMenuOpen()
 {
-	// TODO: Add your control notification handler code here
+	// TODO: Add your command handler code here
+	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
+	CFileDialog fileDlg(TRUE, _T("jpg"), 0, 0, lpszFilter, this);
+
+	INT_PTR response = fileDlg.DoModal();
+	if (IDOK == response)
+	{
+		CString cstrFilePath = fileDlg.GetPathName();
+		TCHAR* tfilename = cstrFilePath.GetBuffer(0);
+		char filename[MAX_PATH] = { 0 };
+#ifdef UNICODE
+		int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
+#else
+		strcpy(filename, tfilename);
+#endif // UNICODE
+		m_pApp->m_pUIEngine->SetImageData(filename);
+	}
+	else if (IDCANCEL == response)
+	{
+
+	}
+}
+
+
+void CUIDialogDlg::OnMenuSave()
+{
+	// TODO: Add your command handler code here
 	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
 	CFileDialog fileDlg(FALSE, _T("jpg"), _T("SaveImage"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, lpszFilter, this);
 
-	CString cstrFilePath;
-	if (IDOK == fileDlg.DoModal())
+	INT_PTR response = fileDlg.DoModal();
+	if (IDOK == response)
 	{
-		cstrFilePath = fileDlg.GetPathName();
-		SetDlgItemText(IDC_STATIC_SAVE, cstrFilePath);
-	}
-
-	TCHAR* tfilename = cstrFilePath.GetBuffer(0);
-	char filename[MAX_PATH] = { 0 };
+		CString cstrFilePath = fileDlg.GetPathName();
+		TCHAR* tfilename = cstrFilePath.GetBuffer(0);
+		char filename[MAX_PATH] = { 0 };
 #ifdef UNICODE
-	int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
+		int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
 #else
-	strcpy(filename, tfilename);
+		strcpy(filename, tfilename);
 #endif // UNICODE
 
-	m_pUIEngine->SaveImageData(filename);
+		m_pApp->m_pUIEngine->SaveImageData(filename);
+	}
+
+	else if (IDCANCEL == response)
+	{
+		int z = 3;
+	}
+}
+
+
+void CUIDialogDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: Add your message handler code here
+	if (1 == nType)	// 如果是最小化则什么都不做
+	{
+		return;
+	}
+
+	CWnd* pCWnd;
+	/*pCWnd = GetDlgItem(IDC_STATIC_PIC);
+	ChangeSize(pCWnd, cx, cy);*/
+	/*pCWnd = GetDlgItem(IDC_BUTTON_SMOOTH);
+	ChangeSize(pCWnd, cx, cy);*/
+	/*pCWnd = GetDlgItem(IDC_BUTTON_PROCESS);
+	ChangeSize(pCWnd, cx, cy);*/
+
+	GetClientRect(&m_rect);
 }

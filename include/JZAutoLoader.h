@@ -120,6 +120,7 @@ inline HMODULE JZDLL_Load(
 	}
 
 	_JZDLL_GetAPI(hDLL, szAPIExtName, ppAPI);
+
 	return hDLL;
 }
 

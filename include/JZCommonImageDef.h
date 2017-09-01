@@ -36,25 +36,46 @@ struct JZImageBuf
 
 };
 
-// 图像处理的一些基本的公共参数
-struct JZCommonParam
-{
-	int size;
-	JZCommonParam()
-	{
-		size = 2;
-	}
-
-	~JZCommonParam()
-	{
-		size = 0;
-	}
-};
-
+// 图像处理输入(源)buffer和输出(目的)buffer
 struct JZImageProcessData
 {
 	JZImageBuf*		pSrcImage;			// 要进行图像处理的buffer
 	JZImageBuf*		pDesImage;			// 用于存储图像处理后的buffer
+};
+
+// 图像处理类型
+enum JZ_IMAGEPROC_TYPE
+{
+	JZ_IMAGE_UNKNOW = -1,
+	JZ_IMAGE_SMOOTH,
+};
+
+// 图像处理的一些基本的公共参数
+struct JZCommonParam
+{
+	JZ_IMAGEPROC_TYPE processType;
+	JZCommonParam()
+	{
+		processType = JZ_IMAGE_UNKNOW;
+	}
+};
+
+
+enum JZ_SMOOTH_TYPE
+{
+	JZ_SMOOTH_GAUSSIAN = 0,
+	JZ_SMOOTH_MEAN,
+	JZ_SMOOTH_MEDIAN,
+	JZ_SMOOTH_BILATERAL,
+};
+struct JZSmoothParam : public JZCommonParam
+{
+	JZ_SMOOTH_TYPE smoothType;
+	JZSmoothParam()
+	{
+		processType = JZ_IMAGE_SMOOTH;
+		smoothType = JZ_SMOOTH_GAUSSIAN;
+	}
 };
 
 #endif // !__JZ_COMMONIMAGEDEF_H__

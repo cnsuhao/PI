@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include <IJZUIEngine.h>
 #ifndef __AFXWIN_H__
 	#error "在包含此文件之前包含“stdafx.h”以生成 PCH 文件"
 #endif
@@ -19,6 +19,7 @@ class CUIDialogApp : public CWinApp
 {
 public:
 	CUIDialogApp();
+	IJZUIEngine* m_pUIEngine;
 
 // 重写
 public:

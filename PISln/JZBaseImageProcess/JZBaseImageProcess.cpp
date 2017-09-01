@@ -36,6 +36,8 @@ JZ_RESULT JZBaseImageProcess::WriteImage(JZImageBuf* pImageBuf, const char* file
 {
 	if (NULL == pImageBuf || NULL == pImageBuf->color)
 	{
+		Mat image = Mat::zeros(Size(500, 500), CV_8UC3);
+		imwrite(filename, image);
 		return JZ_FAILED;
 	}
 
