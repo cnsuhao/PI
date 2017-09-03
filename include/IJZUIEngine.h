@@ -12,6 +12,8 @@ public:
 	virtual JZ_RESULT Release() = 0;
 	// 设置要处理的图像数据
 	virtual JZ_RESULT SetImageData(const char* filename) = 0;
+	// 是否已经设置了要处理的图像
+	virtual bool IsSetSrcImage() = 0;
 	// 将处理后的图像数据保存为图片
 	virtual JZ_RESULT SaveImageData(const char* filename) = 0;
 	// 设置当前图像处理类型

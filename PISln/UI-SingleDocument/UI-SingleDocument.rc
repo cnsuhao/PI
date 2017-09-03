@@ -247,14 +247,12 @@ BEGIN
             END
         END
     END
-    POPUP "形态学处理"
+    POPUP "图像处理"
     BEGIN
-        MENUITEM "开运算",                         ID_32771
-        MENUITEM "闭运算",                         ID_32772
-        MENUITEM "腐蚀",                          ID_32773
-        MENUITEM "膨胀",                          ID_32774
+        MENUITEM "图像平滑",                        ID_IMAGE_SMOOTH
+        MENUITEM "形态学处理",                       ID_32777
+        MENUITEM "图像增强",                        ID_32778
     END
-    MENUITEM "图像增强",                        0
     POPUP "帮助(&H)"
     BEGIN
         MENUITEM "关于 UI-SingleDocument(&A)...", ID_APP_ABOUT
@@ -365,6 +363,18 @@ BEGIN
     DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
 END
 
+IDD_DIALOG_SMOOTH DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "图像平滑参数设置面板"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,198,155,50,14
+    PUSHBUTTON      "取消",IDCANCEL,252,155,50,14
+    COMBOBOX        IDC_COMBO_SMOOTH,54,22,74,16,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "滤波类型",IDC_STATIC,16,25,32,12
+    PUSHBUTTON      "处理",IDC_BUTTON_PROCESS,193,23,46,13
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -420,8 +430,27 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 55
     END
+
+    IDD_DIALOG_SMOOTH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DIALOG_SMOOTH AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

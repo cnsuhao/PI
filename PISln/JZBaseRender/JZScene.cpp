@@ -24,7 +24,8 @@
 JZScene::JZScene()
 {
 	m_pShader = new JZShader();
-	m_pTexture = new JZTexture();
+	m_pSrcTexture = new JZTexture();
+	m_pDstTexture = new JZTexture();
 	m_pDevice = new JZDevice();
 	m_pMesh = new JZMesh();
 	m_groundColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
@@ -48,17 +49,16 @@ JZ_RESULT JZScene::SetDevice(HWND hWnd)
 	//绘制区域占据整个窗口大小 
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
-	float texAspect = (float)m_pTexture->GetTexWidth() / (float)m_pTexture->GetTexHeight();
+	float texAspect = (float)m_pSrcTexture->GetTexWidth() / (float)m_pSrcTexture->GetTexHeight();
 	float rectAspect = (float)((width - 1) / 2) / (float)height;
 
-	GLuint srcRenderbuffer;
-	glGenRenderbuffers(1, &srcRenderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, srcRenderbuffer);
+	glGenRenderbuffers(1, &m_srcRenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_srcRenderbuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, width / 2, height);
 
 	glGenFramebuffers(1, &m_srcFramebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_srcFramebuffer);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, srcRenderbuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_srcRenderbuffer);
 
 	GLenum srcFrameStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (GL_FRAMEBUFFER_COMPLETE != srcFrameStatus)
@@ -67,14 +67,14 @@ JZ_RESULT JZScene::SetDevice(HWND hWnd)
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	GLuint dstRenderbuffer;
-	glGenRenderbuffers(1, &dstRenderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, dstRenderbuffer);
+	
+	glGenRenderbuffers(1, &m_dstRenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_dstRenderbuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, width / 2, height);
 
 	glGenFramebuffers(1, &m_dstFramebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_dstFramebuffer);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, dstRenderbuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_dstRenderbuffer);
 
 	GLenum dstFrameStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (GL_FRAMEBUFFER_COMPLETE != dstFrameStatus)
@@ -100,7 +100,7 @@ void JZScene::SetLeftImage(JZImageBuf* pImageBuf /* = NULL */)
 {	// 纹理资源
 	if (NULL == pImageBuf)
 	{
-		m_pTexture->Release();
+		m_pSrcTexture->Release();
 		int texWidth = 1;
 		int texHeight = 1;
 		unsigned char* image = new unsigned char[3];
@@ -114,47 +114,15 @@ void JZScene::SetLeftImage(JZImageBuf* pImageBuf /* = NULL */)
 		imageBuf.pixel_fmt = JZ_PIXFMT_RGB;
 		imageBuf.width = texWidth;
 		imageBuf.height = texHeight;
-		m_pTexture->Create(&imageBuf);
+		m_pSrcTexture->Create(&imageBuf);
 	}
 	else
 	{
-		m_pTexture->Release();
-		m_pTexture->Create(pImageBuf);
+		m_pSrcTexture->Release();
+		m_pSrcTexture->Create(pImageBuf);
 	}
 
-	// 网格资源
-	RECT rect; //在这个矩形中画图  
-	GetClientRect(m_hwnd, &rect);
-	//绘制区域占据整个窗口大小 
-	int width = rect.right - rect.left;
-	int height = rect.bottom - rect.top;
-	float texAspect = (float)m_pTexture->GetTexWidth() / (float)m_pTexture->GetTexHeight();
-	float rectAspect = (float)((width - 1) / 2) / (float)height;
-	m_pMesh->CreateQuadMesh(rectAspect, texAspect);
-
-	m_bResChanged = true;
-
-	// 往shader中传纹理
-	m_pShader->Use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pTexture->GetTexID());
-	glUniform1i(glGetUniformLocation(m_pShader->GetProgramID(), "fTexture"), 0);
-	assert(0 == glGetError());
-	m_bResChanged = false;
-
-	// 往shader中传其他参数
-	// todo...
-
-	// 左侧图像设置为pImageBuf
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_srcFramebuffer);
-	glViewport(0, 0, width / 2, height);
-	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	assert(0 == glGetError());
-	m_pMesh->Draw();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);	
+	_RenderSrcFramebuffer();
 
 }
 
@@ -162,7 +130,7 @@ void JZScene::SetRightImage(JZImageBuf* pImageBuf /* = NULL */)
 {	// 纹理资源
 	if (NULL == pImageBuf)
 	{
-		m_pTexture->Release();
+		m_pDstTexture->Release();
 		int texWidth = 1;
 		int texHeight = 1;
 		unsigned char* image = new unsigned char[3];
@@ -176,47 +144,15 @@ void JZScene::SetRightImage(JZImageBuf* pImageBuf /* = NULL */)
 		imageBuf.pixel_fmt = JZ_PIXFMT_RGB;
 		imageBuf.width = texWidth;
 		imageBuf.height = texHeight;
-		m_pTexture->Create(&imageBuf);
+		m_pDstTexture->Create(&imageBuf);
 	}
 	else
 	{
-		m_pTexture->Release();
-		m_pTexture->Create(pImageBuf);
+		m_pDstTexture->Release();
+		m_pDstTexture->Create(pImageBuf);
 	}
 
-	// 网格资源
-	RECT rect; //在这个矩形中画图  
-	GetClientRect(m_hwnd, &rect);
-	//绘制区域占据整个窗口大小 
-	int width = rect.right - rect.left;
-	int height = rect.bottom - rect.top;
-	float texAspect = (float)m_pTexture->GetTexWidth() / (float)m_pTexture->GetTexHeight();
-	float rectAspect = (float)((width - 1) / 2) / (float)height;
-	m_pMesh->CreateQuadMesh(rectAspect, texAspect);
-
-	m_bResChanged = true;
-
-	// 往shader中传纹理
-	m_pShader->Use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pTexture->GetTexID());
-	glUniform1i(glGetUniformLocation(m_pShader->GetProgramID(), "fTexture"), 0);
-	assert(0 == glGetError());
-	m_bResChanged = false;
-
-	// 往shader中传其他参数
-	// todo...
-
-	// 右侧图像设置为pImageBuf
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_dstFramebuffer);
-	glViewport(0, 0, width / 2, height);
-	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	assert(0 == glGetError());
-	m_pMesh->Draw(); 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	_RenderDstFramebuffer();
 }
 
 void JZScene::SetGroundColor(glm::vec4 color /*= glm::vec4(0.2f, 0.3f, 0.3f, 1.0f)*/)
@@ -234,6 +170,9 @@ void JZScene::init(HWND hWnd)
 
 void JZScene::RenderScene()
 {
+	_RenderSrcFramebuffer();
+	_RenderDstFramebuffer();
+
 	RECT rect; //在这个矩形中画图  
 	GetClientRect(m_hwnd, &rect);
 	//绘制区域占据整个窗口大小 
@@ -242,7 +181,7 @@ void JZScene::RenderScene()
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_srcFramebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, width / 2, height, 0, 0, width / 2, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, (width-1) / 2, height, 0, 0, (width-1) / 2, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_dstFramebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -258,10 +197,16 @@ void JZScene::Release()
 		m_pShader = NULL;
 	}
 	
-	if (NULL != m_pTexture)
+	if (NULL != m_pSrcTexture)
 	{
-		delete (JZTexture*)m_pTexture;
-		m_pTexture = NULL;
+		delete (JZTexture*)m_pSrcTexture;
+		m_pSrcTexture = NULL;
+	}
+
+	if (NULL != m_pDstTexture)
+	{
+		delete (JZTexture*)m_pDstTexture;
+		m_pDstTexture = NULL;
 	}
 
 	if (NULL != m_pMesh)
@@ -275,6 +220,82 @@ void JZScene::Release()
 		delete (JZDevice*)m_pDevice;
 		m_pDevice = NULL;
 	}
+}
+
+JZ_RESULT JZScene::_RenderSrcFramebuffer()
+{
+	RECT rect; //在这个矩形中画图  
+	GetClientRect(m_hwnd, &rect);
+	//绘制区域占据整个窗口大小 
+	int width = rect.right - rect.left;
+	int height = rect.bottom - rect.top;
+
+	// 往shader中传纹理
+	m_pShader->Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pSrcTexture->GetTexID());
+	glUniform1i(glGetUniformLocation(m_pShader->GetProgramID(), "fTexture"), 0);
+	assert(0 == glGetError());
+
+	// 往shader中传其他参数
+	// todo...
+
+	glBindRenderbuffer(GL_RENDERBUFFER, m_srcRenderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, width / 2, height);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_srcFramebuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_srcRenderbuffer);
+	glViewport(0, 0, (width - 1) / 2, height);
+	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	assert(0 == glGetError());
+	float texAspect = (float)m_pSrcTexture->GetTexWidth() / (float)m_pSrcTexture->GetTexHeight();
+	float rectAspect = (float)((width - 1) / 2) / (float)height;
+	m_pMesh->CreateQuadMesh(rectAspect, texAspect);
+	m_pMesh->Draw();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	return JZ_SUCCESS;
+}
+
+JZ_RESULT JZScene::_RenderDstFramebuffer()
+{
+	RECT rect; //在这个矩形中画图  
+	GetClientRect(m_hwnd, &rect);
+	//绘制区域占据整个窗口大小 
+	int width = rect.right - rect.left;
+	int height = rect.bottom - rect.top;
+
+	// 往shader中传纹理
+	m_pShader->Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pDstTexture->GetTexID());
+	glUniform1i(glGetUniformLocation(m_pShader->GetProgramID(), "fTexture"), 0);
+	assert(0 == glGetError());
+
+	// 往shader中传其他参数
+	// todo...
+
+	glBindRenderbuffer(GL_RENDERBUFFER, m_dstRenderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, width / 2, height);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_dstFramebuffer);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_dstRenderbuffer);
+	glViewport(0, 0, (width - 1) / 2, height);
+	glClearColor(m_groundColor.r, m_groundColor.g, m_groundColor.b, m_groundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	assert(0 == glGetError());
+	float texAspect = (float)m_pDstTexture->GetTexWidth() / (float)m_pDstTexture->GetTexHeight();
+	float rectAspect = (float)((width - 1) / 2) / (float)height;
+	m_pMesh->CreateQuadMesh(rectAspect, texAspect);
+	m_pMesh->Draw();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	return JZ_SUCCESS;
 }
 
 

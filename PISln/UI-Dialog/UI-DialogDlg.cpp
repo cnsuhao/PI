@@ -278,11 +278,6 @@ void CUIDialogDlg::OnMenuSave()
 
 		m_pApp->m_pUIEngine->SaveImageData(filename);
 	}
-
-	else if (IDCANCEL == response)
-	{
-		int z = 3;
-	}
 }
 
 

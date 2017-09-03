@@ -19,6 +19,8 @@ public:
 	virtual JZ_RESULT Release();
 	// 设置要处理的图像数据
 	virtual JZ_RESULT SetImageData(const char* filename);
+	// 是否已经设置了要处理的图像
+	virtual bool IsSetSrcImage();
 	// 将处理后的图像数据保存为图片
 	virtual JZ_RESULT SaveImageData(const char* filename);
 	// 设置图像处理的参数
@@ -55,6 +57,7 @@ private:
 	map<JZ_IMAGEPROC_TYPE, IJZBaseImageProcess*>	m_mapImageProcess;		// 存放不同图像处理方法的接口  <图像处理名字-图像处理接口>
 	map<JZ_IMAGEPROC_TYPE, JZCommonParam*>			m_mapProcessParam;		// 存放不同图像处理方法的参数  <图像处理名字-图像处理参数>
 	JZ_IMAGEPROC_TYPE								m_curPocessType;		// 当前的图像处理类型
+	bool											m_bIsInit;				// 标志当前引擎是否已经初始化了
 };
 
 #endif // __JZ_UIENGINE_H__

@@ -10,6 +10,7 @@ JZUIEngine::JZUIEngine()
 	m_imageProcessData.pDesImage = NULL;
 	m_pBaseImageProcess = NULL;
 	m_curPocessType = JZ_IMAGE_UNKNOW;
+	m_bIsInit = false;
 }
 
 JZUIEngine::~JZUIEngine()
@@ -23,6 +24,7 @@ JZ_RESULT JZUIEngine::Init(HWND hWnd)
 	res = _InitRenderSDK(hWnd);
 	res = _InitBaseImageSDK();
 	_InitImageProcessPlugin();
+	m_bIsInit = true;
 	return res;
 }
 
@@ -36,14 +38,14 @@ JZ_RESULT JZUIEngine::Release()
 
 JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 {
-	_ReleaseImageData();// 设置前，先释放没有释放的图像数据
-
-	JZ_RESULT res = JZ_SUCCESS;
-	if (NULL == filename)
+	if (!m_bIsInit)
 	{
 		return JZ_FAILED;
 	}
-	res = m_pBaseImageProcess->ReadImage(filename, m_imageProcessData.pSrcImage);
+
+	_ReleaseImageData();// 设置前，先释放没有释放的图像数据
+
+	JZ_RESULT res = m_pBaseImageProcess->ReadImage(filename, m_imageProcessData.pSrcImage);
 	if (JZ_SUCCESS == res)
 	{
 		m_imageProcessData.pDesImage->width = m_imageProcessData.pSrcImage->width;
@@ -54,8 +56,25 @@ JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 		m_pSceneRender->SetLeftImage(m_imageProcessData.pSrcImage);
 		m_pSceneRender->SetRightImage(NULL);
 	}
+	else
+	{
+		m_pSceneRender->SetLeftImage(NULL);
+		m_pSceneRender->SetRightImage(NULL);
+	}
 	
 	return JZ_SUCCESS;
+}
+
+bool JZUIEngine::IsSetSrcImage()
+{
+	if (NULL == m_imageProcessData.pSrcImage->color)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 // 将处理后的图像数据保存为图片
@@ -101,6 +120,10 @@ JZ_RESULT JZUIEngine::ProcessImage()
 
 JZ_RESULT JZUIEngine::Render()
 {
+	if (!m_bIsInit)
+	{
+		return JZ_FAILED;
+	}
 	m_pSceneRender->RenderScene();
 	return JZ_SUCCESS;
 }

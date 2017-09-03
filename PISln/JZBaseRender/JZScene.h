@@ -27,13 +27,20 @@ public:
 	virtual void Release();
 
 private:
+	JZ_RESULT _RenderSrcFramebuffer();
+	JZ_RESULT _RenderDstFramebuffer();
+
+private:
 	glm::vec4		m_groundColor;		// 显示区域背景颜色RGBA
 	IJZShader*		m_pShader;			// OpenGL绘制需要的shader资源
-	IJZTexture*		m_pTexture;			// OpenGL绘制需要的纹理资源
+	IJZTexture*		m_pSrcTexture;		// OpenGL绘制源图像需要的纹理资源
+	IJZTexture*		m_pDstTexture;		// OpenGL绘制目的图像需要的纹理资源
 	IJZDevice*		m_pDevice;			// OpenGL绘制需要的设备资源
 	IJZMesh*		m_pMesh;			// OpenGL绘制需要的网格资源
 	unsigned int	m_srcFramebuffer;	// 用于离屏渲染的帧缓存
 	unsigned int	m_dstFramebuffer;
+	unsigned int	m_srcRenderbuffer;
+	unsigned int	m_dstRenderbuffer;
 	HWND			m_hwnd;				// 用于绘制的窗口区域
 	bool			m_bResChanged;		// 用来标志是否有资源发生了改变，若改变了则要重新将数据传入显存
 };

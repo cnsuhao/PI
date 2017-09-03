@@ -10,7 +10,7 @@
 
 #include "UI-SingleDocumentDoc.h"
 #include "UI-SingleDocumentView.h"
-
+#include <IJZUIEngineProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -48,7 +48,14 @@ CUISingleDocumentApp::CUISingleDocumentApp()
 	SetAppID(_T("UI-SingleDocument.AppID.NoVersion"));
 
 	// TODO: 在此处添加构造代码，
+	m_pUIEngine = NULL;
+	g_JZUIEngineAPI->pfnGetInterface(&m_pUIEngine);
 	// 将所有重要的初始化放置在 InitInstance 中
+}
+
+CUISingleDocumentApp::~CUISingleDocumentApp()
+{
+	g_JZUIEngineAPI->pfnReleaseInterface(m_pUIEngine);
 }
 
 // 唯一的一个 CUISingleDocumentApp 对象
@@ -135,12 +142,19 @@ BOOL CUISingleDocumentApp::InitInstance()
 	// 唯一的一个窗口已初始化，因此显示它并对其进行更新
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
+
+	
+	CUISingleDocumentView* pView = (CUISingleDocumentView*)((CFrameWnd*)AfxGetApp()->m_pMainWnd)->GetActiveView();
+	HWND hWnd = pView->m_hWnd;
+	m_pUIEngine->Init(hWnd);
+	pView->Invalidate();
 	return TRUE;
 }
 
 int CUISingleDocumentApp::ExitInstance()
 {
 	//TODO: 处理可能已添加的附加资源
+	m_pUIEngine->Release();
 	AfxOleTerm(FALSE);
 
 	return CWinAppEx::ExitInstance();
