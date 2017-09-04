@@ -4,6 +4,7 @@
 
 #pragma once
 #include "DlgSmooth.h"
+#include "DlgMorphology.h"
 
 class CUISingleDocumentView : public CView
 {
@@ -38,6 +39,7 @@ public:
 protected:
 	CUISingleDocumentApp* m_pApp;
 	CDlgSmooth* m_pSmoothDialog;
+	CDlgMorphology* m_pMorphologyDialog;
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -52,6 +54,7 @@ public:
 	afx_msg void OnImageSmooth();
 	afx_msg void OnDestroy();
 	afx_msg void OnFileSave();
+	afx_msg void OnImageMorph();
 };
 
 #ifndef _DEBUG  // UI-SingleDocumentView.cpp 中的调试版本

@@ -8,12 +8,6 @@ using namespace cv;
 #	pragma comment(lib, "opencv_world320.lib")
 #endif // _DEBUG
 
-JZ_RESULT JZImageSmooth::ImageSmooth(JZImageBuf* psrc, JZImageBuf*  pdes, JZCommonParam* param)
-{
-
-	return JZ_SUCCESS;
-}
-
 JZ_RESULT JZImageSmooth::ProcessImage(JZImageProcessData* pImageProcessData, JZCommonParam* pParam)
 {
 	if (NULL == pImageProcessData->pSrcImage->color || NULL == pImageProcessData->pDesImage->color)

@@ -48,6 +48,7 @@ enum JZ_IMAGEPROC_TYPE
 {
 	JZ_IMAGE_UNKNOW = -1,
 	JZ_IMAGE_SMOOTH,
+	JZ_IMAGE_MORPHOLOGY,
 };
 
 // 图像处理的一些基本的公共参数
@@ -60,14 +61,15 @@ struct JZCommonParam
 	}
 };
 
-
+// 图像平滑基本参数
 enum JZ_SMOOTH_TYPE
 {
-	JZ_SMOOTH_GAUSSIAN = 0,
-	JZ_SMOOTH_MEAN,
-	JZ_SMOOTH_MEDIAN,
-	JZ_SMOOTH_BILATERAL,
+	JZ_SMOOTH_GAUSSIAN = 0,	// 高斯滤波
+	JZ_SMOOTH_MEAN,	// 均值滤波
+	JZ_SMOOTH_MEDIAN, // 中值滤波
+	JZ_SMOOTH_BILATERAL, // 双边滤波
 };
+
 struct JZSmoothParam : public JZCommonParam
 {
 	JZ_SMOOTH_TYPE smoothType;
@@ -75,6 +77,32 @@ struct JZSmoothParam : public JZCommonParam
 	{
 		processType = JZ_IMAGE_SMOOTH;
 		smoothType = JZ_SMOOTH_GAUSSIAN;
+	}
+};
+
+// 图像形态学处理基本参数
+enum JZ_MORPHOLOGY_TYPE
+{
+	JZ_MORPHOLOGY_ERODE, // 腐蚀
+	JZ_MORPHOLOGY_DILATE, // 膨胀
+	JZ_MORPHOLOGY_OPEN, // 开运算
+	JZ_MORPHOLOGY_CLOSE, // 闭运算
+	JZ_MORPHOLOGY_GRADIENT, // 形态学梯度
+	JZ_MORPHOLOGY_TOPHAT, // 顶帽
+	JZ_MORPHOLOGY_BLACKHAT, // 黑帽
+	JZ_MORPHOLOGY_HITMISS, // 击中击不中
+
+};
+
+struct JZMorphologyParam: public JZCommonParam
+{
+	JZ_MORPHOLOGY_TYPE morphologyType; // 形态学类型
+	int elementSize;  // 元素大小为: 2 * elementSize + 1
+	JZMorphologyParam()
+	{
+		processType = JZ_IMAGE_MORPHOLOGY;
+		morphologyType = JZ_MORPHOLOGY_ERODE;
+		elementSize = 1;
 	}
 };
 

@@ -1,7 +1,8 @@
 #include "JZUIEngine.h"
+#include <IJZBaseRenderProc.h>
 #include <IJZBaseImageProcessProc.h>
 #include <IJZImageSmoothProc.h>
-#include <IJZBaseRenderProc.h>
+#include <IJZImageMorphologyProc.h>
 
 JZUIEngine::JZUIEngine()
 {
@@ -23,7 +24,7 @@ JZ_RESULT JZUIEngine::Init(HWND hWnd)
 	JZ_RESULT res = JZ_UNKNOW;
 	res = _InitRenderSDK(hWnd);
 	res = _InitBaseImageSDK();
-	_InitImageProcessPlugin();
+	res = _InitImageProcessPlugin();
 	m_bIsInit = true;
 	return res;
 }
@@ -92,6 +93,12 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 	{
 		JZSmoothParam* pSmoothParam = (JZSmoothParam*)pParam;
 		((JZSmoothParam*)m_mapProcessParam[JZ_IMAGE_SMOOTH])->smoothType = pSmoothParam->smoothType;
+		break;
+	}
+	case JZ_IMAGE_MORPHOLOGY:
+	{
+		JZMorphologyParam* pMorphologyParam = new JZMorphologyParam();
+		((JZMorphologyParam*)m_mapProcessParam[JZ_IMAGE_MORPHOLOGY])->morphologyType = pMorphologyParam->morphologyType;
 		break;
 	}
 	default:
@@ -180,6 +187,8 @@ JZ_RESULT JZUIEngine::_InitImageProcessPlugin()
 {
 	// 初始化图像处理接口，并放入m_mapImageProcess
 	IJZBaseImageProcess* tempBaseImageProcess = NULL;
+
+	// 图像平滑SDK接口
 	if (g_JZImageSmoothAPI)
 	{
 		g_JZImageSmoothAPI->pfnGetInterface(&tempBaseImageProcess);	// 生成图像平滑接口
@@ -190,6 +199,15 @@ JZ_RESULT JZUIEngine::_InitImageProcessPlugin()
 		m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_SMOOTH, param));
 	}
 	
+	// 图像形态学处理SDK接口
+	if (g_JZImageMorphologyAPI)
+	{
+		g_JZImageMorphologyAPI->pfnGetInterface(&tempBaseImageProcess); // 生成图像形态学处理接口
+		m_mapImageProcess.insert(pair<JZ_IMAGEPROC_TYPE, IJZBaseImageProcess*>(JZ_IMAGE_MORPHOLOGY, tempBaseImageProcess));
+		// 初始图像处理参数，并放入m_mapProcessParam
+		JZMorphologyParam* param = new JZMorphologyParam();
+		m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_MORPHOLOGY, param));
+	}
 
 	return JZ_SUCCESS;
 }

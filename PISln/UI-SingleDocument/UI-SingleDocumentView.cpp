@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CUISingleDocumentView, CView)
 	ON_COMMAND(ID_IMAGE_SMOOTH, &CUISingleDocumentView::OnImageSmooth)
 	ON_WM_DESTROY()
 	ON_COMMAND(ID_FILE_SAVE, &CUISingleDocumentView::OnFileSave)
+	ON_COMMAND(ID_IMAGE_MORPH, &CUISingleDocumentView::OnImageMorph)
 END_MESSAGE_MAP()
 
 // CUISingleDocumentView 构造/析构
@@ -44,6 +45,7 @@ CUISingleDocumentView::CUISingleDocumentView()
 	// TODO: 在此处添加构造代码
 	m_pApp = (CUISingleDocumentApp*)AfxGetApp();
 	m_pSmoothDialog = NULL;
+	m_pMorphologyDialog = NULL;
 }
 
 CUISingleDocumentView::~CUISingleDocumentView()
@@ -221,6 +223,32 @@ void CUISingleDocumentView::OnImageSmooth()
 	
 }
 
+void CUISingleDocumentView::OnImageMorph()
+{
+	// TODO: Add your command handler code here
+	if (!m_pApp->m_pUIEngine->IsSetSrcImage())
+	{
+		// 显示消息对话框   
+		INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		return;
+	}
+
+	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_MORPHOLOGY);
+
+	/*if (NULL == m_pMorphologyDialog)
+	{
+	m_pMorphologyDialog = new CDlgMorphology();
+	}
+	m_pMorphologyDialog->DoModal();*/
+
+	// 非模态对话框
+	if (NULL == m_pMorphologyDialog)
+	{
+		m_pMorphologyDialog = new CDlgMorphology();
+		m_pMorphologyDialog->Create(IDD_DIALOG_MORPHOLOGY, this);
+	}
+	m_pMorphologyDialog->ShowWindow(SW_SHOW);
+}
 
 void CUISingleDocumentView::OnDestroy()
 {
@@ -231,6 +259,12 @@ void CUISingleDocumentView::OnDestroy()
 	{
 		delete m_pSmoothDialog;
 		m_pSmoothDialog = NULL;
+	}
+
+	if (NULL != m_pMorphologyDialog)
+	{
+		delete m_pMorphologyDialog;
+		m_pMorphologyDialog = NULL;
 	}
 }
 
@@ -257,3 +291,6 @@ void CUISingleDocumentView::OnFileSave()
 		m_pApp->m_pUIEngine->SaveImageData(filename);
 	}
 }
+
+
+
