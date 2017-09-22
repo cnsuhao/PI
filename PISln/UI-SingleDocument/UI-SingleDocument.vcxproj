@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="DlgMorphology.h" />
+    <ClInclude Include="DlgPlateRecog.h" />
     <ClInclude Include="DlgSmooth.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
@@ -223,6 +224,7 @@
   <ItemGroup>
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="DlgMorphology.cpp" />
+    <ClCompile Include="DlgPlateRecog.cpp" />
     <ClCompile Include="DlgSmooth.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />

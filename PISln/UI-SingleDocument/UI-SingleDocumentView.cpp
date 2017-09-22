@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CUISingleDocumentView, CView)
 	ON_WM_DESTROY()
 	ON_COMMAND(ID_FILE_SAVE, &CUISingleDocumentView::OnFileSave)
 	ON_COMMAND(ID_IMAGE_MORPH, &CUISingleDocumentView::OnImageMorph)
+	ON_COMMAND(ID_32781, &CUISingleDocumentView::OnPlateRecog)
 END_MESSAGE_MAP()
 
 // CUISingleDocumentView 构造/析构
@@ -46,6 +47,7 @@ CUISingleDocumentView::CUISingleDocumentView()
 	m_pApp = (CUISingleDocumentApp*)AfxGetApp();
 	m_pSmoothDialog = NULL;
 	m_pMorphologyDialog = NULL;
+	m_pPlateRecogDialog = NULL;
 }
 
 CUISingleDocumentView::~CUISingleDocumentView()
@@ -293,4 +295,29 @@ void CUISingleDocumentView::OnFileSave()
 }
 
 
+void CUISingleDocumentView::OnPlateRecog()
+{
+	// TODO: Add your command handler code here
+	if (!m_pApp->m_pUIEngine->IsSetSrcImage())
+	{
+		// 显示消息对话框   
+		INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		return;
+	}
 
+	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_PLATERECOG);
+
+	/*if (NULL == m_pPlateRecogDialog)
+	{
+	m_pPlateRecogDialog = new CDlgPlateRecog();
+	}
+	m_pPlateRecogDialog->DoModal();*/
+
+	// 非模态对话框
+	if (NULL == m_pPlateRecogDialog)
+	{
+		m_pPlateRecogDialog = new CDlgPlateRecog();
+		m_pPlateRecogDialog->Create(IDD_DIALOG_PLATERECOG, this);
+	}
+	m_pPlateRecogDialog->ShowWindow(SW_SHOW);
+}

@@ -3,6 +3,7 @@
 #include <IJZBaseImageProcessProc.h>
 #include <IJZImageSmoothProc.h>
 #include <IJZImageMorphologyProc.h>
+#include <IJZImagePlateRecogProc.h>
 
 JZUIEngine::JZUIEngine()
 {
@@ -62,6 +63,8 @@ JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 		m_pSceneRender->SetLeftImage(NULL);
 		m_pSceneRender->SetRightImage(NULL);
 	}
+
+	m_imageProcessData.pExtraData = new JZImageProcessExtraData();
 	
 	return JZ_SUCCESS;
 }
@@ -101,6 +104,10 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 		((JZMorphologyParam*)m_mapProcessParam[JZ_IMAGE_MORPHOLOGY])->morphologyType = pMorphologyParam->morphologyType;
 		break;
 	}
+	case JZ_IMAGE_PLATERECOG:
+	{
+		break;
+	}
 	default:
 		break;
 	}
@@ -123,6 +130,12 @@ JZ_RESULT JZUIEngine::ProcessImage()
 	m_mapImageProcess[m_curPocessType]->ProcessImage(&m_imageProcessData, m_mapProcessParam[m_curPocessType]);
 	m_pSceneRender->SetRightImage(m_imageProcessData.pDesImage);
 	return JZ_SUCCESS;
+}
+
+// 获取存储的额外图像处理结果数据
+JZImageProcessExtraData* JZUIEngine::GetExtraData()
+{
+	return m_imageProcessData.pExtraData;
 }
 
 JZ_RESULT JZUIEngine::Render()
@@ -209,6 +222,16 @@ JZ_RESULT JZUIEngine::_InitImageProcessPlugin()
 		m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_MORPHOLOGY, param));
 	}
 
+	// 车牌识别SDK接口
+	if (g_JZImagePlateRecogAPI)
+	{
+		g_JZImagePlateRecogAPI->pfnGetInterface(&tempBaseImageProcess); // 生成车牌识别接口
+		m_mapImageProcess.insert(pair<JZ_IMAGEPROC_TYPE, IJZBaseImageProcess*>(JZ_IMAGE_PLATERECOG, tempBaseImageProcess));
+		// 初始车牌识别参数，并放入m_mapProcessParam
+		JZPlateRecogParam* param = new JZPlateRecogParam();
+		m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_PLATERECOG, param));
+	}
+
 	return JZ_SUCCESS;
 }
 
@@ -262,6 +285,10 @@ JZ_RESULT JZUIEngine::_ReleaseImageData()
 		m_imageProcessData.pSrcImage->color = NULL;
 	}
 
+	if (NULL != m_imageProcessData.pExtraData)
+	{
+		delete m_imageProcessData.pExtraData;
+	}
 	return JZ_SUCCESS;
 }
 
@@ -271,6 +298,14 @@ void JZUIEngine::_ReleaseImageProcessAPI(JZ_IMAGEPROC_TYPE eImageProcType, IJZBa
 	{
 	case JZ_IMAGE_SMOOTH:
 		g_JZImageSmoothAPI->pfnReleaseInterface(pBaseImageProcess);
+		pBaseImageProcess = NULL;
+		break;
+	case JZ_IMAGE_MORPHOLOGY:
+		g_JZImageMorphologyAPI->pfnReleaseInterface(pBaseImageProcess);
+		pBaseImageProcess = NULL;
+		break;
+	case JZ_IMAGE_PLATERECOG:
+		g_JZImagePlateRecogAPI->pfnReleaseInterface(pBaseImageProcess);
 		pBaseImageProcess = NULL;
 		break;
 	default:

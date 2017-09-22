@@ -22,6 +22,8 @@ public:
 	virtual JZ_RESULT SetProcessParam(JZCommonParam* param) = 0;
 	// 根据图像处理类型进行图像处理
 	virtual JZ_RESULT ProcessImage() = 0;
+	// 获取存储的额外图像处理结果数据
+	virtual JZImageProcessExtraData* GetExtraData() = 0;
 	// 渲染场景
 	virtual JZ_RESULT Render() = 0;
 

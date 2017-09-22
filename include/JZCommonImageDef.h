@@ -1,6 +1,10 @@
 #ifndef __JZ_COMMONIMAGEDEF_H__
 #define __JZ_COMMONIMAGEDEF_H__
-
+#include <vector>
+#include <string>
+#ifndef MAX_PATH
+#	define MAX_PATH          260
+#endif
 // 返回结果定义
 enum JZ_RESULT
 {
@@ -36,11 +40,19 @@ struct JZImageBuf
 
 };
 
+// 图像处理额外存储的数据
+struct JZImageProcessExtraData
+{
+	std::vector<std::string>	vecPlateStrs;		// 用于存储识别出的车牌字符串
+};
+
 // 图像处理输入(源)buffer和输出(目的)buffer
 struct JZImageProcessData
 {
-	JZImageBuf*		pSrcImage;			// 要进行图像处理的buffer
-	JZImageBuf*		pDesImage;			// 用于存储图像处理后的buffer
+	JZImageBuf*					pSrcImage;			// 要进行图像处理的buffer
+	JZImageBuf*					pDesImage;			// 用于存储图像处理后的buffer
+	std::vector<std::string>	vecPlateStrs;		// 用于存储识别出的车牌字符串
+	JZImageProcessExtraData*	pExtraData;			// 存储额外数据
 };
 
 // 图像处理类型
@@ -49,6 +61,7 @@ enum JZ_IMAGEPROC_TYPE
 	JZ_IMAGE_UNKNOW = -1,
 	JZ_IMAGE_SMOOTH,
 	JZ_IMAGE_MORPHOLOGY,
+	JZ_IMAGE_PLATERECOG,
 };
 
 // 图像处理的一些基本的公共参数
@@ -94,6 +107,7 @@ enum JZ_MORPHOLOGY_TYPE
 
 };
 
+// 形态学处理参数
 struct JZMorphologyParam: public JZCommonParam
 {
 	JZ_MORPHOLOGY_TYPE morphologyType; // 形态学类型
@@ -103,6 +117,15 @@ struct JZMorphologyParam: public JZCommonParam
 		processType = JZ_IMAGE_MORPHOLOGY;
 		morphologyType = JZ_MORPHOLOGY_ERODE;
 		elementSize = 1;
+	}
+};
+
+// 车牌识别参数
+struct JZPlateRecogParam : public JZCommonParam
+{
+	JZPlateRecogParam()
+	{
+		processType = JZ_IMAGE_PLATERECOG;
 	}
 };
 

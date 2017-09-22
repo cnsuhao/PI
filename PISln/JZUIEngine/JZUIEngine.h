@@ -29,6 +29,8 @@ public:
 	virtual JZ_RESULT SetCurProcessType(JZ_IMAGEPROC_TYPE curProcessType);
 	// 根据图像处理类型进行图像处理
 	virtual JZ_RESULT ProcessImage();
+	// 获取存储的额外图像处理结果数据
+	virtual JZImageProcessExtraData* GetExtraData();
 	// 渲染场景
 	virtual JZ_RESULT Render();
 	
