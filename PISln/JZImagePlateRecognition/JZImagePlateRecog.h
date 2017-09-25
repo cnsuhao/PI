@@ -1,7 +1,7 @@
 #ifndef __JZ_IMAGEPLATERECOG_H__
 #define __JZ_IMAGEPLATERECOG_H__
 #include <IJZImagePlateRecog.h>
-class JZImagePlateRecog : public JZBaseImageProcess
+class JZImagePlateRecog : public IJZImagePlateRecog
 {
 public:
 	// ´¦ÀíÍ¼Ïñ

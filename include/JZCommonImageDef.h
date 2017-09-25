@@ -58,10 +58,10 @@ struct JZImageProcessData
 // 图像处理类型
 enum JZ_IMAGEPROC_TYPE
 {
-	JZ_IMAGE_UNKNOW = -1,
-	JZ_IMAGE_SMOOTH,
-	JZ_IMAGE_MORPHOLOGY,
+	JZ_IMAGE_UNKNOWN = -1,
+	JZ_IMAGE_BASEPROCESS,
 	JZ_IMAGE_PLATERECOG,
+	
 };
 
 // 图像处理的一些基本的公共参数
@@ -70,7 +70,26 @@ struct JZCommonParam
 	JZ_IMAGEPROC_TYPE processType;
 	JZCommonParam()
 	{
-		processType = JZ_IMAGE_UNKNOW;
+		processType = JZ_IMAGE_UNKNOWN;
+	}
+};
+
+// 基本图像处理类型
+enum JZ_BASEPROCESS_TYPE
+{
+	JZ_BASEPROCESS_UNKNOWN,
+	JZ_BASEPROCESS_SMOOTH,		// 图像平滑
+	JZ_BASEPROCESS_MORPHOLOGY,	// 图像形态学
+};
+
+// 基本图像处理参数
+struct JZBaseProcessParam : public JZCommonParam
+{
+	JZ_BASEPROCESS_TYPE baseProcessType;
+	JZBaseProcessParam()
+	{
+		processType = JZ_IMAGE_BASEPROCESS;
+		baseProcessType = JZ_BASEPROCESS_UNKNOWN;
 	}
 };
 
@@ -83,12 +102,12 @@ enum JZ_SMOOTH_TYPE
 	JZ_SMOOTH_BILATERAL, // 双边滤波
 };
 
-struct JZSmoothParam : public JZCommonParam
+struct JZSmoothParam : public JZBaseProcessParam
 {
 	JZ_SMOOTH_TYPE smoothType;
 	JZSmoothParam()
 	{
-		processType = JZ_IMAGE_SMOOTH;
+		baseProcessType = JZ_BASEPROCESS_SMOOTH;
 		smoothType = JZ_SMOOTH_GAUSSIAN;
 	}
 };
@@ -108,13 +127,13 @@ enum JZ_MORPHOLOGY_TYPE
 };
 
 // 形态学处理参数
-struct JZMorphologyParam: public JZCommonParam
+struct JZMorphologyParam: public JZBaseProcessParam
 {
 	JZ_MORPHOLOGY_TYPE morphologyType; // 形态学类型
 	int elementSize;  // 元素大小为: 2 * elementSize + 1
 	JZMorphologyParam()
 	{
-		processType = JZ_IMAGE_MORPHOLOGY;
+		baseProcessType = JZ_BASEPROCESS_MORPHOLOGY;
 		morphologyType = JZ_MORPHOLOGY_ERODE;
 		elementSize = 1;
 	}

@@ -52,13 +52,13 @@ JZ_RESULT JZImageSmooth::ProcessImage(JZImageProcessData* pImageProcessData, JZC
 }
 
 //////////////////////////////////////////导出的接口////////////////////////////////
-JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI)
+JZ_RESULT GetInterface(IJZImageProcessBase** ppAPI)
 {
 	*ppAPI = new JZImageSmooth();
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT ReleaseInterface(IJZBaseImageProcess*& pAPI)
+JZ_RESULT ReleaseInterface(IJZImageProcessBase*& pAPI)
 {
 	if (NULL != pAPI)
 	{

@@ -200,7 +200,7 @@ void CUIDialogDlg::OnBnClickedButtonSmooth()	// 通过此按钮打开图像模糊参数设置面
 	//}
 	//m_pSmoothDialog->ShowWindow(SW_SHOW);
 
-	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_SMOOTH);
+	//m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_SMOOTH);
 }
 
 void CUIDialogDlg::OnDestroy()
@@ -226,7 +226,7 @@ void CUIDialogDlg::OnTimer(UINT_PTR nIDEvent)
 void CUIDialogDlg::OnBnClickedButtonProcess()
 {
 	// TODO: Add your control notification handler code here
-	m_pApp->m_pUIEngine->ProcessImage();
+	m_pApp->m_pUIEngine->ProcessImage(JZ_IMAGE_BASEPROCESS);
 }
 
 

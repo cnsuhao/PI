@@ -206,7 +206,7 @@ void CUISingleDocumentView::OnImageSmooth()
 		 return;
 	}
 
-	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_SMOOTH);
+	//m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_SMOOTH);
 
 	/*if (NULL == m_pSmoothDialog)
 	{
@@ -235,7 +235,7 @@ void CUISingleDocumentView::OnImageMorph()
 		return;
 	}
 
-	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_MORPHOLOGY);
+	//m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_MORPHOLOGY);
 
 	/*if (NULL == m_pMorphologyDialog)
 	{
@@ -305,7 +305,7 @@ void CUISingleDocumentView::OnPlateRecog()
 		return;
 	}
 
-	m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_PLATERECOG);
+	//m_pApp->m_pUIEngine->SetCurProcessType(JZ_IMAGE_PLATERECOG);
 
 	/*if (NULL == m_pPlateRecogDialog)
 	{

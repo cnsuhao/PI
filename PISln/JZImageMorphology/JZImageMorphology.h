@@ -1,7 +1,7 @@
 #ifndef __JZ_IMAGEMORPHOLOGY_H__
 #define __JZ_IMAGEMORPHOLOGY_H__
 #include <IJZImageMorphology.h>
-class JZImageMorphology : public JZBaseImageProcess
+class JZImageMorphology : public IJZImageProcessBase
 {
 public:
 	// ´¦ÀíÍ¼Ïñ

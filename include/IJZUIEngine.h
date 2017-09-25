@@ -16,12 +16,10 @@ public:
 	virtual bool IsSetSrcImage() = 0;
 	// 将处理后的图像数据保存为图片
 	virtual JZ_RESULT SaveImageData(const char* filename) = 0;
-	// 设置当前图像处理类型
-	virtual JZ_RESULT SetCurProcessType(JZ_IMAGEPROC_TYPE curProcessType) = 0;
 	// 设置图像处理的参数
 	virtual JZ_RESULT SetProcessParam(JZCommonParam* param) = 0;
 	// 根据图像处理类型进行图像处理
-	virtual JZ_RESULT ProcessImage() = 0;
+	virtual JZ_RESULT ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS_TYPE baseProcessType = JZ_BASEPROCESS_UNKNOWN) = 0;
 	// 获取存储的额外图像处理结果数据
 	virtual JZImageProcessExtraData* GetExtraData() = 0;
 	// 渲染场景

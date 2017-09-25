@@ -3,6 +3,8 @@
 #include <IJZBaseRender.h>
 #include <IJZUIEngine.h>
 #include <IJZBaseImageProcess.h>
+#include <IJZImagePlateRecog.h>
+#include <IJZImageProcessBase.h>
 #include <map>
 using namespace std;
 
@@ -25,10 +27,8 @@ public:
 	virtual JZ_RESULT SaveImageData(const char* filename);
 	// 设置图像处理的参数
 	virtual JZ_RESULT SetProcessParam(JZCommonParam* param);
-	// 设置当前图像处理类型
-	virtual JZ_RESULT SetCurProcessType(JZ_IMAGEPROC_TYPE curProcessType);
 	// 根据图像处理类型进行图像处理
-	virtual JZ_RESULT ProcessImage();
+	virtual JZ_RESULT ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS_TYPE baseProcessType = JZ_BASEPROCESS_UNKNOWN);
 	// 获取存储的额外图像处理结果数据
 	virtual JZImageProcessExtraData* GetExtraData();
 	// 渲染场景
@@ -51,14 +51,15 @@ private:
 	// 释放图像数据
 	JZ_RESULT _ReleaseImageData();
 	// 根据图像处理类型，释放对应的图像处理接口
-	void _ReleaseImageProcessAPI(JZ_IMAGEPROC_TYPE eImageProcType, IJZBaseImageProcess*& pBaseImageProcess);
+	void _ReleaseImageProcessAPI(JZ_IMAGEPROC_TYPE eImageProcType, IJZImageProcessBase*& pBaseImageProcess);
 private:
 	IJZSceneRender*									m_pSceneRender;			// 图像渲染场景
 	JZImageProcessData								m_imageProcessData;		// 用于图像处理的图像数据
-	IJZBaseImageProcess*							m_pBaseImageProcess;	// 图像处理基类接口
-	map<JZ_IMAGEPROC_TYPE, IJZBaseImageProcess*>	m_mapImageProcess;		// 存放不同图像处理方法的接口  <图像处理名字-图像处理接口>
+	IJZBaseImageProcess*							m_pBaseImageProcess;	// 基本图像处理接口
+	map<JZ_BASEPROCESS_TYPE, JZCommonParam*>		m_mapBaseProcessParam;	// 基本图像处理参数
+	IJZImagePlateRecog*								m_pImagePlateRecog;		// 车牌识别接口
+	map<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>	m_mapImageProcess;		// 存放不同图像处理方法的接口  <图像处理名字-图像处理接口>
 	map<JZ_IMAGEPROC_TYPE, JZCommonParam*>			m_mapProcessParam;		// 存放不同图像处理方法的参数  <图像处理名字-图像处理参数>
-	JZ_IMAGEPROC_TYPE								m_curPocessType;		// 当前的图像处理类型
 	bool											m_bIsInit;				// 标志当前引擎是否已经初始化了
 };
 

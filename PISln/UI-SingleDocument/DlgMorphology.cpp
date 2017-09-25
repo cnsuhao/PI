@@ -70,7 +70,8 @@ void CDlgMorphology::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
 	JZMorphologyParam morphologyParam;
-	morphologyParam.processType = JZ_IMAGE_MORPHOLOGY;
+	morphologyParam.processType = JZ_IMAGE_BASEPROCESS;
+	morphologyParam.baseProcessType = JZ_BASEPROCESS_MORPHOLOGY;
 	morphologyParam.morphologyType = (JZ_MORPHOLOGY_TYPE)m_comboMorphType.GetCurSel();
 	m_pApp->m_pUIEngine->SetProcessParam(&morphologyParam);
 	CDialogEx::OnTimer(nIDEvent);
@@ -80,7 +81,7 @@ void CDlgMorphology::OnTimer(UINT_PTR nIDEvent)
 void CDlgMorphology::OnBnClickedButtonProcess()
 {
 	// TODO: Add your control notification handler code here
-	m_pApp->m_pUIEngine->ProcessImage();
+	m_pApp->m_pUIEngine->ProcessImage(JZ_IMAGE_BASEPROCESS, JZ_BASEPROCESS_MORPHOLOGY);
 	CView* pView = (CView*)((CFrameWnd*)AfxGetApp()->m_pMainWnd)->GetActiveView();
 	pView->Invalidate();
 }

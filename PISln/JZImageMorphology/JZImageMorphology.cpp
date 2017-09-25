@@ -67,13 +67,13 @@ JZ_RESULT JZImageMorphology::ProcessImage(JZImageProcessData* pImageProcessData,
 }
 
 //////////////////////////////////////////导出的接口////////////////////////////////
-JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI)
+JZ_RESULT GetInterface(IJZImageProcessBase** ppAPI)
 {
 	*ppAPI = new JZImageMorphology();
 	return JZ_SUCCESS;
 }
 
-JZ_RESULT ReleaseInterface(IJZBaseImageProcess*& pAPI)
+JZ_RESULT ReleaseInterface(IJZImageProcessBase*& pAPI)
 {
 	if (NULL != pAPI)
 	{

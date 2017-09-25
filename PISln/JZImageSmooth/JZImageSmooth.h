@@ -1,7 +1,7 @@
 #ifndef __JZ_IMAGESMOOTH_H__
 #define __JZ_IMAGESMOOTH_H__
 #include <IJZImageSmooth.h>
-class JZImageSmooth : public JZBaseImageProcess
+class JZImageSmooth : public IJZImageProcessBase
 {
 public:
 	// ´¦ÀíÍ¼Ïñ

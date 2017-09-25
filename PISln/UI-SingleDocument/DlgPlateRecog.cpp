@@ -41,7 +41,7 @@ END_MESSAGE_MAP()
 void CDlgPlateRecog::OnBnClickedButtonPlaterecog()
 {
 	// TODO: Add your control notification handler code here
-	m_pApp->m_pUIEngine->ProcessImage();
+	m_pApp->m_pUIEngine->ProcessImage(JZ_IMAGE_PLATERECOG);
 	JZImageProcessExtraData* pExtraData = m_pApp->m_pUIEngine->GetExtraData();
 	for (int i = 0; i < pExtraData->vecPlateStrs.size(); i++)
 	{

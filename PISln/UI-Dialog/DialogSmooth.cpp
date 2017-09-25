@@ -66,7 +66,8 @@ void CDialogSmooth::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
 	JZSmoothParam smoothParam;
-	smoothParam.processType = JZ_IMAGE_SMOOTH;
+	smoothParam.processType = JZ_IMAGE_BASEPROCESS;
+	smoothParam.baseProcessType = JZ_BASEPROCESS_SMOOTH;
 	smoothParam.smoothType = (JZ_SMOOTH_TYPE)m_comboSmoothType.GetCurSel();
 	m_pApp->m_pUIEngine->SetProcessParam(&smoothParam);
 	CDialogEx::OnTimer(nIDEvent);
