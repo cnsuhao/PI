@@ -28,16 +28,16 @@ namespace easypr
 		PR_DETECT_CMSER = 0x04,  /**Character detect type, using mser  */
 	};
 
-	static const char* kDefaultSvmPath = "../../sys/model/svm_hist.xml";
-	static const char* kLBPSvmPath = "../../sys/model/svm_lbp.xml";
-	static const char* kHistSvmPath = "../../sys/model/svm_hist.xml";
+	static const char* kDefaultSvmFile = "svm_hist.xml";
+	static const char* kLBPSvmFile = "svm_lbp.xml";
+	static const char* kHistSvmFile = "svm_hist.xml";
 
-	static const char* kDefaultAnnPath = "../../sys/model/ann.xml";
-	static const char* kChineseAnnPath = "../../sys/model/ann_chinese.xml";
-	static const char* kGrayAnnPath = "../../sys/model/annCh.xml";
+	static const char* kDefaultAnnFile = "ann.xml";
+	static const char* kChineseAnnFile = "ann_chinese.xml";
+	static const char* kGrayAnnFile = "annCh.xml";
 
 	//This is important to for key transform to chinese
-	static const char* kChineseMappingPath = "../../sys/model/province_mapping";
+	static const char* kChineseMappingFile = "province_mapping";
 
 	typedef enum
 	{
@@ -45,7 +45,7 @@ namespace easypr
 		kInverse = 0  // correspond to "no plate"
 	} SvmLabel;
 
-	static const int	DEFAULT_DEBUG = 1;					// 是否默认开启调试模式（显示中间图像）
+	static const int	DEFAULT_DEBUG = 0;					// 是否默认开启调试模式（显示中间图像）
 	static const int	DEFAULT_WINDOW_WIDTH = 1000;		// 默认显示窗口宽
 	static const int	DEFAULT_WINDOW_HEIGHT = 800;		// 默认显示窗口高
 	static const int	HORIZONTAL = 1;						// 获取图像水平方向特征的标志

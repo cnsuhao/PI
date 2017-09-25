@@ -147,6 +147,7 @@ namespace easypr
 		
 #ifdef OS_WINDOWS
 		static std::string utf8_to_gbk(const char* utf8);
+		static std::string getModelDir();
 #endif
 
 	private:
