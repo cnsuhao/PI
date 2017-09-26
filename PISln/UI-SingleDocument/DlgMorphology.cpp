@@ -50,14 +50,14 @@ BOOL CDlgMorphology::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	m_comboMorphType.AddString(_T("腐蚀"));
+	m_comboMorphType.AddString(_T("腐蚀")); 
 	m_comboMorphType.AddString(_T("膨胀"));
-	m_comboMorphType.AddString(_T("开运算"));
-	m_comboMorphType.AddString(_T("闭运算"));
+	m_comboMorphType.AddString(_T("开运算")); 
+	m_comboMorphType.AddString(_T("闭运算")); 
 	m_comboMorphType.AddString(_T("形态学梯度"));
-	m_comboMorphType.AddString(_T("顶帽"));
-	m_comboMorphType.AddString(_T("黑帽"));
-	m_comboMorphType.AddString(_T("击中击不中"));
+	m_comboMorphType.AddString(_T("顶帽")); 
+	m_comboMorphType.AddString(_T("黑帽")); 
+	m_comboMorphType.AddString(_T("击中击不中")); 
 	m_comboMorphType.SetCurSel(0);
 
 	SetTimer(1, 10, NULL);	// 每隔10ms调用一次OnTimer()函数

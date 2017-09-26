@@ -1,8 +1,6 @@
 #include "JZUIEngine.h"
 #include <IJZBaseRenderProc.h>
 #include <IJZBaseImageProcessProc.h>
-#include <IJZImageSmoothProc.h>
-#include <IJZImageMorphologyProc.h>
 #include <IJZImagePlateRecogProc.h>
 
 JZUIEngine::JZUIEngine()
@@ -20,24 +18,25 @@ JZUIEngine::~JZUIEngine()
 
 }
 
+// 初始化UIEngine中成员
 JZ_RESULT JZUIEngine::Init(HWND hWnd)
 {
 	JZ_RESULT res = JZ_UNKNOW;
 	res = _InitRenderSDK(hWnd);
-	res = _InitBaseImageSDK();
-	res = _InitImageProcessPlugin();
+	res = _InitImageProcessSDK();
 	m_bIsInit = true;
 	return res;
 }
 
+// 释放UIEngine中成员
 JZ_RESULT JZUIEngine::Release()
 {
 	_ReleaseRenderSDK();
-	_ReleaseBaseImageSDK();
-	_ReleaseImageProcessPlugin();
+	_ReleaseImageProcessSDK();
 	return JZ_SUCCESS;
 }
 
+// 设置要处理的图像数据
 JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 {
 	if (!m_bIsInit)
@@ -69,6 +68,7 @@ JZ_RESULT JZUIEngine::SetImageData(const char* filename)
 	return JZ_SUCCESS;
 }
 
+// 是否已经设置了要处理的图像
 bool JZUIEngine::IsSetSrcImage()
 {
 	if (NULL == m_imageProcessData.pSrcImage->color)
@@ -88,24 +88,25 @@ JZ_RESULT JZUIEngine::SaveImageData(const char* filename)
 	return res;
 }
 
+// 设置图像处理的参数
 JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 {
 	switch (pParam->processType)
 	{
-	case JZ_IMAGE_BASEPROCESS:
+	case JZ_IMAGE_BASEPROCESS: // 基本图像处理
 	{
 		JZBaseProcessParam* pBaseProcessParam = (JZBaseProcessParam*)pParam;
 		switch (pBaseProcessParam->baseProcessType)
 		{
-		case JZ_BASEPROCESS_SMOOTH:
+		case JZ_BASEPROCESS_SMOOTH: // 图像平滑
 		{
 			JZSmoothParam* pSmoothParam = (JZSmoothParam*)pParam;
 			((JZSmoothParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_SMOOTH])->smoothType = pSmoothParam->smoothType;
 			break;
 		}
-		case JZ_BASEPROCESS_MORPHOLOGY:
+		case JZ_BASEPROCESS_MORPHOLOGY: // 图像形态学
 		{
-			JZMorphologyParam* pMorphologyParam = new JZMorphologyParam();
+			JZMorphologyParam* pMorphologyParam = (JZMorphologyParam*)pParam;
 			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->morphologyType = pMorphologyParam->morphologyType;
 			break;
 		}
@@ -114,7 +115,7 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 		}
 		break;
 	}
-	case JZ_IMAGE_PLATERECOG:
+	case JZ_IMAGE_PLATERECOG: // 车牌识别
 	{
 		break;
 	}
@@ -124,6 +125,7 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 	return JZ_SUCCESS;
 }
 
+// 根据图像处理类型进行图像处理
 JZ_RESULT JZUIEngine::ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS_TYPE baseProcessType/* = JZ_BASEPROCESS_UNKNOWN*/)
 {
 	if (JZ_IMAGE_UNKNOWN == processType)
@@ -137,7 +139,7 @@ JZ_RESULT JZUIEngine::ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS
 		m_pBaseImageProcess->ProcessImage(&m_imageProcessData, m_mapBaseProcessParam[baseProcessType]);
 		break;
 	case JZ_IMAGE_PLATERECOG:
-		m_pImagePlateRecog->ProcessImage(&m_imageProcessData, m_mapProcessParam[processType]);
+		m_pImagePlateRecog->ProcessImage(&m_imageProcessData, m_pPlateRecogParam);
 		break;
 	default:
 		break;
@@ -153,6 +155,7 @@ JZImageProcessExtraData* JZUIEngine::GetExtraData()
 	return m_imageProcessData.pExtraData;
 }
 
+// 渲染场景
 JZ_RESULT JZUIEngine::Render()
 {
 	if (!m_bIsInit)
@@ -164,6 +167,7 @@ JZ_RESULT JZUIEngine::Render()
 }
 
 //////////////////////////////////////////// 私有函数//////////////////////////////////
+// 初始化图形渲染接口
 JZ_RESULT JZUIEngine::_InitRenderSDK(HWND hWnd)
 {
 	m_pSceneRender = NULL;
@@ -172,6 +176,32 @@ JZ_RESULT JZUIEngine::_InitRenderSDK(HWND hWnd)
 	return JZ_SUCCESS;
 }
 
+// 初始化图像处理接口和参数
+JZ_RESULT JZUIEngine::_InitImageProcessSDK()
+{
+	// 初始化基本图像处理接口和参数
+	m_pBaseImageProcess = NULL;
+	g_JZBaseImageProcessAPI->pfnGetInterface(&m_pBaseImageProcess);
+	JZSmoothParam* smoothParam = new JZSmoothParam();
+	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_SMOOTH, smoothParam));
+	JZMorphologyParam* morphologyParam = new JZMorphologyParam();
+	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_MORPHOLOGY, morphologyParam));
+
+	// 初始化车牌识别接口和参数
+	m_pImagePlateRecog = NULL;
+	g_JZImagePlateRecogAPI->pfnGetInterface(&m_pImagePlateRecog);
+	m_pPlateRecogParam = new JZPlateRecogParam();
+
+	// 初始化图像数据
+	static JZImageBuf src = { 0 };
+	static JZImageBuf des = { 0 };
+	m_imageProcessData.pSrcImage = &src;
+	m_imageProcessData.pDesImage = &des;
+
+	return JZ_SUCCESS;
+}
+
+// 释放图形渲染接口
 JZ_RESULT JZUIEngine::_ReleaseRenderSDK()
 {
 	if (NULL != m_pSceneRender)
@@ -183,54 +213,29 @@ JZ_RESULT JZUIEngine::_ReleaseRenderSDK()
 	return JZ_SUCCESS;
 }
 
-
-JZ_RESULT JZUIEngine::_InitBaseImageSDK()
-{
-	// 初始化基本图像处理接口
-	m_pBaseImageProcess = NULL;
-	g_JZBaseImageProcessAPI->pfnGetInterface(&m_pBaseImageProcess);
-
-	// 初始图像处理参数，并放入m_mapBaseProcessParam
-	JZSmoothParam* smoothParam = new JZSmoothParam();
-	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_SMOOTH, smoothParam));
-	JZMorphologyParam* morphologyParam = new JZMorphologyParam();
-	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_MORPHOLOGY, morphologyParam));
-
-	// 初始化车牌识别接口
-	m_pImagePlateRecog = NULL;
-	g_JZImagePlateRecogAPI->pfnGetInterface(&m_pImagePlateRecog);
-	// 初始化图像数据
-	static JZImageBuf src = { 0 };
-	static JZImageBuf des = { 0 };
-	m_imageProcessData.pSrcImage = &src;
-	m_imageProcessData.pDesImage = &des;
-
-	return JZ_SUCCESS;
-}
-
-JZ_RESULT JZUIEngine::_ReleaseBaseImageSDK()
+// 释放图像处理基类接口和参数
+JZ_RESULT JZUIEngine::_ReleaseImageProcessSDK()
 {
 	// 防止用户忘记释放图像数据
 	_ReleaseImageData();		
 
-	// 释放基本图像处理接口
+	// 释放图像处理SDK接口
 	if (NULL != m_pBaseImageProcess)
 	{
 		
-		g_JZBaseImageProcessAPI->pfnReleaseInterface(m_pBaseImageProcess);
+		g_JZBaseImageProcessAPI->pfnReleaseInterface(m_pBaseImageProcess);// 释放基本图像处理接口
 		m_pBaseImageProcess = NULL;
 	}
 
-	// 释放车牌识别接口
 	if (NULL != m_pImagePlateRecog)
 	{
-		g_JZImagePlateRecogAPI->pfnReleaseInterface(m_pImagePlateRecog);
+		g_JZImagePlateRecogAPI->pfnReleaseInterface(m_pImagePlateRecog);// 释放车牌识别接口
 		m_pImagePlateRecog = NULL;
 	}
 
 	// 释放图像处理参数
 	for (map<JZ_BASEPROCESS_TYPE, JZCommonParam*>::iterator it = m_mapBaseProcessParam.begin();
-	it != m_mapBaseProcessParam.end();)
+	it != m_mapBaseProcessParam.end();) // 释放基本图像处理参数
 	{
 		if (NULL != it->second)
 		{
@@ -244,84 +249,16 @@ JZ_RESULT JZUIEngine::_ReleaseBaseImageSDK()
 		}
 	}
 
-	return JZ_SUCCESS;
-}
-
-JZ_RESULT JZUIEngine::_InitImageProcessPlugin()
-{
-	// 初始化图像处理接口，并放入m_mapImageProcess
-	IJZImageProcessBase* tempBaseImageProcess = NULL;
-
-	//// 图像平滑SDK接口
-	//if (g_JZImageSmoothAPI)
-	//{
-	//	g_JZImageSmoothAPI->pfnGetInterface(&tempBaseImageProcess);	// 生成图像平滑接口
-	//	m_mapImageProcess.insert(pair<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>(JZ_IMAGE_SMOOTH, tempBaseImageProcess));
-
-	//	// 初始图像处理参数，并放入m_mapProcessParam
-	//	JZSmoothParam* param = new JZSmoothParam();
-	//	m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_SMOOTH, param));
-	//}
-	//
-	//// 图像形态学处理SDK接口
-	//if (g_JZImageMorphologyAPI)
-	//{
-	//	g_JZImageMorphologyAPI->pfnGetInterface(&tempBaseImageProcess); // 生成图像形态学处理接口
-	//	m_mapImageProcess.insert(pair<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>(JZ_IMAGE_MORPHOLOGY, tempBaseImageProcess));
-	//	// 初始图像处理参数，并放入m_mapProcessParam
-	//	JZMorphologyParam* param = new JZMorphologyParam();
-	//	m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_MORPHOLOGY, param));
-	//}
-
-	//// 车牌识别SDK接口
-	//if (g_JZImagePlateRecogAPI)
-	//{
-	//	g_JZImagePlateRecogAPI->pfnGetInterface(&tempBaseImageProcess); // 生成车牌识别接口
-	//	m_mapImageProcess.insert(pair<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>(JZ_IMAGE_PLATERECOG, tempBaseImageProcess));
-	//	// 初始车牌识别参数，并放入m_mapProcessParam
-	//	JZPlateRecogParam* param = new JZPlateRecogParam();
-	//	m_mapProcessParam.insert(pair<JZ_IMAGEPROC_TYPE, JZCommonParam*>(JZ_IMAGE_PLATERECOG, param));
-	//}
-
-	return JZ_SUCCESS;
-}
-
-JZ_RESULT JZUIEngine::_ReleaseImageProcessPlugin()
-{
-	// 释放图像处理接口
-	for (map<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>::iterator it = m_mapImageProcess.begin();
-	it != m_mapImageProcess.end();)
+	if (NULL != m_pPlateRecogParam)
 	{
-		if (NULL != it->second)
-		{
-			_ReleaseImageProcessAPI(it->first, it->second);
-			it->second = NULL;
-			it = m_mapImageProcess.erase(it);
-		}
-		else
-		{
-			it++;
-		}
+		delete m_pPlateRecogParam;
+		m_pPlateRecogParam = NULL;
 	}
 
-	// 释放图像处理参数
-	for (map<JZ_IMAGEPROC_TYPE, JZCommonParam*>::iterator it = m_mapProcessParam.begin();
-	it != m_mapProcessParam.end();)
-	{
-		if (NULL != it->second)
-		{
-			delete it->second;
-			it->second = NULL;
-			it = m_mapProcessParam.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
 	return JZ_SUCCESS;
 }
 
+// 释放图像数据
 JZ_RESULT JZUIEngine::_ReleaseImageData()
 {
 	if (NULL != m_imageProcessData.pDesImage->color)
@@ -341,27 +278,6 @@ JZ_RESULT JZUIEngine::_ReleaseImageData()
 		delete m_imageProcessData.pExtraData;
 	}
 	return JZ_SUCCESS;
-}
-
-void JZUIEngine::_ReleaseImageProcessAPI(JZ_IMAGEPROC_TYPE eImageProcType, IJZImageProcessBase*& pBaseImageProcess)
-{
-	//switch (eImageProcType)
-	//{
-	//case JZ_IMAGE_SMOOTH:
-	//	g_JZImageSmoothAPI->pfnReleaseInterface(pBaseImageProcess);
-	//	pBaseImageProcess = NULL;
-	//	break;
-	//case JZ_IMAGE_MORPHOLOGY:
-	//	g_JZImageMorphologyAPI->pfnReleaseInterface(pBaseImageProcess);
-	//	pBaseImageProcess = NULL;
-	//	break;
-	//case JZ_IMAGE_PLATERECOG:
-	//	g_JZImagePlateRecogAPI->pfnReleaseInterface(pBaseImageProcess);
-	//	pBaseImageProcess = NULL;
-	//	break;
-	//default:
-	//	break;
-	//}
 }
 
 //////////////////////////////////////////// 接口导出//////////////////////////////////

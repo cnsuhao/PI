@@ -4,7 +4,6 @@
 #include <IJZUIEngine.h>
 #include <IJZBaseImageProcess.h>
 #include <IJZImagePlateRecog.h>
-#include <IJZImageProcessBase.h>
 #include <map>
 using namespace std;
 
@@ -38,28 +37,21 @@ public:
 private:
 	// 初始化图形渲染接口
 	JZ_RESULT _InitRenderSDK(HWND hWnd);
+	// 初始化图像处理接口和参数
+	JZ_RESULT _InitImageProcessSDK();
 	// 释放图形渲染接口
 	JZ_RESULT _ReleaseRenderSDK();
-	// 初始化图像处理基类接口
-	JZ_RESULT _InitBaseImageSDK();
-	// 释放图像处理基类接口
-	JZ_RESULT _ReleaseBaseImageSDK();
-	// 初始化图像处理插件接口
-	JZ_RESULT _InitImageProcessPlugin();
-	// 释放图像处理插件接口
-	JZ_RESULT _ReleaseImageProcessPlugin();
+	// 释放图像处理基类接口和参数
+	JZ_RESULT _ReleaseImageProcessSDK();
 	// 释放图像数据
 	JZ_RESULT _ReleaseImageData();
-	// 根据图像处理类型，释放对应的图像处理接口
-	void _ReleaseImageProcessAPI(JZ_IMAGEPROC_TYPE eImageProcType, IJZImageProcessBase*& pBaseImageProcess);
 private:
 	IJZSceneRender*									m_pSceneRender;			// 图像渲染场景
 	JZImageProcessData								m_imageProcessData;		// 用于图像处理的图像数据
 	IJZBaseImageProcess*							m_pBaseImageProcess;	// 基本图像处理接口
 	map<JZ_BASEPROCESS_TYPE, JZCommonParam*>		m_mapBaseProcessParam;	// 基本图像处理参数
 	IJZImagePlateRecog*								m_pImagePlateRecog;		// 车牌识别接口
-	map<JZ_IMAGEPROC_TYPE, IJZImageProcessBase*>	m_mapImageProcess;		// 存放不同图像处理方法的接口  <图像处理名字-图像处理接口>
-	map<JZ_IMAGEPROC_TYPE, JZCommonParam*>			m_mapProcessParam;		// 存放不同图像处理方法的参数  <图像处理名字-图像处理参数>
+	JZCommonParam*									m_pPlateRecogParam;		// 车牌识别参数
 	bool											m_bIsInit;				// 标志当前引擎是否已经初始化了
 };
 
