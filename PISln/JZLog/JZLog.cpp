@@ -10,14 +10,13 @@
 #include <time.h>
 #include <io.h>
 #include <Shlwapi.h>
-#define JZLOG_BUILD
 #include "JZLog.h"
 #pragma comment(lib, "Shlwapi.lib")
-#define NXCPU_LOG_NAME_FMT			_T("CoreSDK-%04d%02d%02d-%02d%02d%02d.txt")
-#define NXCPU_LOG_FILE_DIR			_T("\\CoreLog\\")
+#define JZ_LOG_NAME_FMT			_T("JZLog-%04d%02d%02d-%02d%02d%02d.txt")
+#define JZ_LOG_FILE_DIR			_T("\\sys\\log\\")
 
-CNXCPULog*		g_pCPULog = NULL;
-NXCoreConfig	g_CoreConf;
+JZLog*		g_pLog = NULL;
+JZLogConfig	g_logConf;
 
 // 日志管理线程，删除时间较长的历史日志，防止文件过多
 ULONG __stdcall thread_log_manager(void* _Param)
@@ -33,7 +32,7 @@ ULONG __stdcall thread_log_manager(void* _Param)
 	lt->tm_mon++;
 	TCHAR filename[MAX_PATH];
 	filename[0] = _T('\0');
-	_stprintf(filename, NXCPU_LOG_NAME_FMT, lt->tm_year, lt->tm_mon,
+	_stprintf(filename, JZ_LOG_NAME_FMT, lt->tm_year, lt->tm_mon,
 		lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
 #ifdef _WIN32
 	_tfinddata_t _File;
@@ -60,7 +59,7 @@ ULONG __stdcall thread_log_manager(void* _Param)
 	return (ULONG)0;
 }
 
-CNXCPULog::CNXCPULog(void)
+JZLog::JZLog(void)
 {
 	m_hLogFile = NULL;
 	InitializeCriticalSection(&m_csFile);
@@ -68,7 +67,7 @@ CNXCPULog::CNXCPULog(void)
 	m_szFilePath[0] = _T('\0');
 }
 
-CNXCPULog::~CNXCPULog(void)
+JZLog::~JZLog(void)
 {
 	CloseFile();
 	DeleteCriticalSection(&m_csFile);
@@ -76,7 +75,7 @@ CNXCPULog::~CNXCPULog(void)
 
 // 打开日志文件
 // （1）以读写方式打开，如果日志文件已存在则打开，不存在则创建。
-bool CNXCPULog::OpenFile(IN LPCTSTR szFilePath)		// 日志文件路径
+bool JZLog::OpenFile(IN LPCTSTR szFilePath)		// 日志文件路径
 {
 	EnterCriticalSection(&m_csFile);
 	if (szFilePath == NULL || IsOpened())
@@ -116,7 +115,7 @@ bool CNXCPULog::OpenFile(IN LPCTSTR szFilePath)		// 日志文件路径
 }
 
 // 关闭日志文件
-bool CNXCPULog::CloseFile()
+bool JZLog::CloseFile()
 {
 	if (IsOpened())
 	{
@@ -139,7 +138,7 @@ bool CNXCPULog::CloseFile()
 }
 
 // 写入一个日志项
-bool CNXCPULog::WriteLogLine(IN LPCTSTR szLogInfo)
+bool JZLog::WriteLogLine(IN LPCTSTR szLogInfo)
 {
 	if (!IsOpened())
 		return false;
@@ -170,7 +169,7 @@ bool CNXCPULog::WriteLogLine(IN LPCTSTR szLogInfo)
 }
 
 // 获取系统时间，要求输入的字串容量最少为 STR_TIME_SIZE
-bool CNXCPULog::_GetSysTimeStr(OUT LPTSTR szTime)
+bool JZLog::_GetSysTimeStr(OUT LPTSTR szTime)
 {
 	if (szTime == NULL)
 		return false;
@@ -194,7 +193,7 @@ bool CNXCPULog::_GetSysTimeStr(OUT LPTSTR szTime)
 }
 
 // 在日志文件的最后写入一个字串
-void CNXCPULog::_WriteStrAtEnd(IN LPCTSTR szInfo)
+void JZLog::_WriteStrAtEnd(IN LPCTSTR szInfo)
 {
 	if (szInfo == NULL)
 		return;
@@ -215,7 +214,7 @@ void CNXCPULog::_WriteStrAtEnd(IN LPCTSTR szInfo)
 }
 
 // 设置日志文件路径
-bool CNXCPULog::SetFilePath(IN LPCTSTR szFilePath)
+bool JZLog::SetFilePath(IN LPCTSTR szFilePath)
 {
 	if (_tcslen(szFilePath) < MAX_PATH)
 	{
@@ -225,155 +224,15 @@ bool CNXCPULog::SetFilePath(IN LPCTSTR szFilePath)
 	return false;
 }
 
-// 日志记录
-JZLOG_API void NCB_WriteLog(IN NXCPU_LOG_TYPE eLogType,		// 日志项类型
-	IN LPCTSTR szFileName,			// 发生日志的文件
-	IN LPCTSTR szFuncName,			// 发生日志的函数
-	IN LPCTSTR szFormat, ...)		// 日志内容
+// 关闭日志系统
+void ReleaseLogFile()
 {
-	// 如果配置不输出日志，直接返回
-	if (g_pCPULog == NULL || g_CoreConf.log == 0 || eLogType < g_CoreConf.log_level)
-		return;
-
-	// 如果未创建日志文件，则先创建
-	if (!g_pCPULog->IsOpened())
-	{
-		g_pCPULog->OpenFile(g_pCPULog->GetFilePath());
-	}
-
-	const int NXLOG_CONTENT_SIZE = 512;
-	TCHAR szLogContent[NXLOG_CONTENT_SIZE];
-	TCHAR szLogLine[(NXLOG_CONTENT_SIZE << 1)];
-#ifdef __linux__
-	va_list vl;
-#else
-	va_list vl = { NULL };
-#endif
-
-	szLogContent[0] = szLogLine[0] = _T('\0');
-	// 生成日志内容
-	va_start(vl, szFormat);
-	_vsntprintf(szLogContent, NXLOG_CONTENT_SIZE, szFormat, vl);
-	va_end(vl);
-	// 组合日志项，格式为 LogType    FileName    FuncName    Content
-	switch (eLogType)		// 先组合日志项类型
-	{
-	case NXCPU_LOG_TYPE_MESSAGE:	// 消息
-		_tcscat(szLogLine, _T("<Message>    "));
-		break;
-	case NXCPU_LOG_TYPE_WARNING:	// 警告
-		_tcscat(szLogLine, _T("<Warning>    "));
-		break;
-	case NXCPU_LOG_TYPE_ERROR:		// 错误
-		_tcscat(szLogLine, _T("<Error!!>    "));
-		break;
-	case NXCPU_LOG_TYPE_CRASH:		// 崩溃
-		_tcscat(szLogLine, _T("<!!Crash>    "));
-		break;
-	default:		// 其它
-		_tcscat(szLogLine, _T("<Unknown>    "));
-		break;
-	}
-	// 组合文件名称
-	if (szFileName != NULL)
-	{
-		_tcsncat(szLogLine, szFileName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	else
-	{
-		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	// 组合函数名称
-	if (szFuncName != NULL)
-	{
-		_tcsncat(szLogLine, szFuncName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	else
-	{
-		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	// 组合日志内容
-	_tcsncat(szLogLine, szLogContent, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	// 写入日志项
-	g_pCPULog->WriteLogLine(szLogLine);
-}
-
-JZLOG_API void NCB_WriteLogString(IN NXCPU_LOG_TYPE eLogType,		// 日志项类型
-	IN LPCTSTR szFileName,			// 发生日志的文件
-	IN LPCTSTR szFuncName,			// 发生日志的函数
-	IN char const* szContent)			// 日志内容
-{
-	// 如果配置不输出日志，直接返回
-	if (g_pCPULog == NULL || g_CoreConf.log == 0 || eLogType < g_CoreConf.log_level || !szContent)
-		return;
-
-	// 如果未创建日志文件，则先创建
-	if (!g_pCPULog->IsOpened())
-	{
-		g_pCPULog->OpenFile(g_pCPULog->GetFilePath());
-	}
-
-	const int NXLOG_CONTENT_SIZE = 512;
-	TCHAR szLogContent[NXLOG_CONTENT_SIZE];
-	TCHAR szLogLine[(NXLOG_CONTENT_SIZE << 1)];
-	szLogContent[0] = szLogLine[0] = _T('\0');
-
-	// 组合日志项，格式为 LogType    FileName    FuncName    Content
-	switch (eLogType)		// 先组合日志项类型
-	{
-	case NXCPU_LOG_TYPE_MESSAGE:	// 消息
-		_tcscat(szLogLine, _T("<Message>    "));
-		break;
-	case NXCPU_LOG_TYPE_WARNING:	// 警告
-		_tcscat(szLogLine, _T("<Warning>    "));
-		break;
-	case NXCPU_LOG_TYPE_ERROR:		// 错误
-		_tcscat(szLogLine, _T("<Error!!>    "));
-		break;
-	case NXCPU_LOG_TYPE_CRASH:		// 崩溃
-		_tcscat(szLogLine, _T("<!!Crash>    "));
-		break;
-	default:		// 其它
-		_tcscat(szLogLine, _T("<Unknown>    "));
-		break;
-	}
-	// 组合文件名称
-	if (szFileName != NULL)
-	{
-		_tcsncat(szLogLine, szFileName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	else
-	{
-		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	// 组合函数名称
-	if (szFuncName != NULL)
-	{
-		_tcsncat(szLogLine, szFuncName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	else
-	{
-		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	}
-	// 组合日志内容
-#if defined(_MSC_VER) && defined(UNICODE)
-	MultiByteToWideChar(CP_ACP, 0, szContent, -1, szLogContent, NXLOG_CONTENT_SIZE);
-#else
-	_tcscpy(szLogContent, szContent);
-#endif
-	_tcsncat(szLogLine, szLogContent, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
-	// 写入日志项
-	g_pCPULog->WriteLogLine(szLogLine);
 }
 
 // 启动日志系统
 bool InitLogFile(HMODULE hModule)
 {
-	if (g_pCPULog != NULL)
+	if (g_pLog != NULL)
 		return true;
 
 #ifdef __APPLE__
@@ -388,13 +247,18 @@ bool InitLogFile(HMODULE hModule)
 #ifdef _WIN32
 		int i = 0;
 
-		// 获取日志文件路径，在当前执行路径下建立。
+		// 获取日志文件夹路径，在当前执行路径下建立。
 		if (GetModuleFileName(hModule, szLogPath, MAX_FILE_PATH - 1) != 0)
 		{
+			int count = 0;
 			for (i = (int)_tcslen(szLogPath) - 1; i >= 0; i--)
 			{
 				if (szLogPath[i] == _T('\\'))
+					count++;
+				if (count > 3)
+				{
 					break;
+				}
 			}
 			if (i <= 0)
 			{
@@ -406,46 +270,47 @@ bool InitLogFile(HMODULE hModule)
 		// 读取配置参数
 		TCHAR* szConfig = new TCHAR[i + MAX_PATH];
 		_tcscpy(szConfig, szLogPath);
-		_tcscat(szConfig, _T("\\NXCoreSDKConf.ini"));
-		if ((g_CoreConf.log = GetPrivateProfileInt(_T("Log"), _T("OutputLog"), -1, szConfig)) == -1)
+		_tcscat(szConfig, _T("\\sys\\log\\JZLogConf.ini"));
+		if ((g_logConf.log = GetPrivateProfileInt(_T("Log"), _T("OutputLog"), -1, szConfig)) == -1)
 		{
 #ifdef _DEBUG
-			g_CoreConf.log = 1;
+			g_logConf.log = 1;
 			WritePrivateProfileString(_T("Log"), _T("OutputLog"), _T("1"), szConfig);
 #else
-			g_CoreConf.log = 0;
+			g_logConf.log = 0;
 			WritePrivateProfileString(_T("Log"), _T("OutputLog"), _T("0"), szConfig);
 #endif
 		}
-		if ((g_CoreConf.log_level = GetPrivateProfileInt(_T("Log"), _T("OutputLogLevel"), -1, szConfig)) == -1)
+		if ((g_logConf.log_level = GetPrivateProfileInt(_T("Log"), _T("OutputLogLevel"), -1, szConfig)) == -1)
 		{
 #ifdef _DEBUG
-			g_CoreConf.log_level = NXCPU_LOG_TYPE_MESSAGE;
+			g_logConf.log_level = JZ_LOG_TYPE_MESSAGE;
 			WritePrivateProfileString(_T("Log"), _T("OutputLogLevel"), _T("0    ; 0-MESSAGE, 1-WARNING, 2-ERROR, 3-CRASH"), szConfig);
 #else
-			g_CoreConf.log_level = NXCPU_LOG_TYPE_ERROR;
+			g_logConf.log_level = JZ_LOG_TYPE_ERROR;
 			WritePrivateProfileString(_T("Log"), _T("OutputLogLevel"), _T("2    ; 0-MESSAGE, 1-WARNING, 2-ERROR, 3-CRASH"), szConfig);
 #endif
 		}
 		LPCTSTR szSection = _T("MultithreadedOptimization");
-		if ((g_CoreConf.num_of_threads = GetPrivateProfileInt(szSection, _T("NumberOfThreads"), -1, szConfig)) == -1)
+		if ((g_logConf.num_of_threads = GetPrivateProfileInt(szSection, _T("NumberOfThreads"), -1, szConfig)) == -1)
 		{
-			g_CoreConf.num_of_threads = 4;
+			g_logConf.num_of_threads = 4;
 			WritePrivateProfileString(szSection, _T("NumberOfThreads"), _T("4"), szConfig);
 		}
-		if ((g_CoreConf.mt_resampling = GetPrivateProfileInt(szSection, _T("Resampling"), -1, szConfig)) == -1)
+		if ((g_logConf.mt_resampling = GetPrivateProfileInt(szSection, _T("Resampling"), -1, szConfig)) == -1)
 		{
-			g_CoreConf.mt_resampling = 0;
+			g_logConf.mt_resampling = 0;
 			WritePrivateProfileString(szSection, _T("Resampling"), _T("0"), szConfig);
 		}
-		if ((g_CoreConf.mt_deinterlacing = GetPrivateProfileInt(szSection, _T("Deinterlacing"), -1, szConfig)) == -1)
+		if ((g_logConf.mt_deinterlacing = GetPrivateProfileInt(szSection, _T("Deinterlacing"), -1, szConfig)) == -1)
 		{
-			g_CoreConf.mt_deinterlacing = 0;
+			g_logConf.mt_deinterlacing = 0;
 			WritePrivateProfileString(szSection, _T("Deinterlacing"), _T("0"), szConfig);
 		}
 		delete[] szConfig;
+
 		// 建立日志文件夹
-		_tcscat(szLogPath, NXCPU_LOG_FILE_DIR);
+		_tcscat(szLogPath, JZ_LOG_FILE_DIR);
 #elif defined(__linux__)
 		strcpy(szLogPath, "/mnt/sdcard/CoreSDK/");
 		Dl_info dlinfo = { NULL };
@@ -481,20 +346,20 @@ bool InitLogFile(HMODULE hModule)
 					strvalue.erase(p);
 				p = atoi(strvalue.c_str());
 				if (strkey == "OutputLog")
-					g_CoreConf.log = p;
+					g_logConf.log = p;
 				else if (strkey == "OutputLogLevel")
-					g_CoreConf.log_level = p;
+					g_logConf.log_level = p;
 				else if (strkey == "NumberOfThreads")
-					g_CoreConf.num_of_threads = p;
+					g_logConf.num_of_threads = p;
 				else if (strkey == "Deinterlacing")
-					g_CoreConf.mt_deinterlacing = p;
+					g_logConf.mt_deinterlacing = p;
 				else if (strkey == "Resampling")
-					g_CoreConf.mt_resampling = p;
+					g_logConf.mt_resampling = p;
 			}
 		}
 		strcat(szLogPath, "CoreLog/");
 #endif
-		if (g_CoreConf.log == 0 && !PathFileExists(szLogPath))
+		if (g_logConf.log == 0 && !PathFileExists(szLogPath))
 			return true;
 		if (!PathFileExists(szLogPath) && !CreateDirectory(szLogPath, NULL))
 			return false;
@@ -506,16 +371,16 @@ bool InitLogFile(HMODULE hModule)
 		lt->tm_mon++;
 		TCHAR filename[MAX_PATH];
 		filename[MAX_PATH - 1] = _T('\0');
-		_stprintf(filename, NXCPU_LOG_NAME_FMT, lt->tm_year, lt->tm_mon,
+		_stprintf(filename, JZ_LOG_NAME_FMT, lt->tm_year, lt->tm_mon,
 			lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
 		_tcscat(szLogPath, filename);
-		static CNXCPULog _Mystaticlog;
-		g_pCPULog = &_Mystaticlog;
+		static JZLog _Mystaticlog;
+		g_pLog = &_Mystaticlog;
 		// 创建日志管理线程
 		HANDLE _Thdlogmgr = CreateThread(NULL, 0, thread_log_manager, szLogPath, 0, NULL);
 		CloseHandle(_Thdlogmgr);
 		// 设置日志文件路径
-		g_pCPULog->SetFilePath(szLogPath);
+		g_pLog->SetFilePath(szLogPath);
 	}
 	catch (...)
 	{
@@ -525,9 +390,191 @@ bool InitLogFile(HMODULE hModule)
 	return true;
 }
 
-// 关闭日志系统
-void ReleaseLogFile()
+
+
+#ifdef _WIN32
+BOOL APIENTRY DllMain(HANDLE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved)
 {
+	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
+	{
+		InitLogFile((HMODULE)hModule);		// 初始化日志文件系统
+	}
+	else if (ul_reason_for_call == DLL_PROCESS_DETACH)
+	{
+		ReleaseLogFile();	// 关闭日志文件系统
+	}
+	return TRUE;
+}
+#else
+struct nx_cpubase_loader
+{
+	nx_cpubase_loader()
+	{
+		InitLogFile(NULL);
+	}
+	~nx_cpubase_loader()
+	{
+		ReleaseLogFile();
+	}
+}__singleton_cpubase;
+#endif
+
+//////////////////////////////////////////导出的接口////////////////////////////////
+// 日志记录
+void WriteLog(IN JZ_LOG_TYPE eLogType,		// 日志项类型
+	IN LPCTSTR szFileName,			// 发生日志的文件
+	IN LPCTSTR szFuncName,			// 发生日志的函数
+	IN LPCTSTR szFormat, ...)		// 日志内容
+{
+	// 如果配置不输出日志，直接返回
+	if (g_pLog == NULL || g_logConf.log == 0 || eLogType < g_logConf.log_level)
+		return;
+
+	// 如果未创建日志文件，则先创建
+	if (!g_pLog->IsOpened())
+	{
+		g_pLog->OpenFile(g_pLog->GetFilePath());
+	}
+
+	const int NXLOG_CONTENT_SIZE = 512;
+	TCHAR szLogContent[NXLOG_CONTENT_SIZE];
+	TCHAR szLogLine[(NXLOG_CONTENT_SIZE << 1)];
+#ifdef __linux__
+	va_list vl;
+#else
+	va_list vl = { NULL };
+#endif
+
+	szLogContent[0] = szLogLine[0] = _T('\0');
+	// 生成日志内容
+	va_start(vl, szFormat);
+	_vsntprintf(szLogContent, NXLOG_CONTENT_SIZE, szFormat, vl);
+	va_end(vl);
+	// 组合日志项，格式为 LogType    FileName    FuncName    Content
+	switch (eLogType)		// 先组合日志项类型
+	{
+	case JZ_LOG_TYPE_MESSAGE:	// 消息
+		_tcscat(szLogLine, _T("<Message>    "));
+		break;
+	case JZ_LOG_TYPE_WARNING:	// 警告
+		_tcscat(szLogLine, _T("<Warning>    "));
+		break;
+	case JZ_LOG_TYPE_ERROR:		// 错误
+		_tcscat(szLogLine, _T("<Error!!>    "));
+		break;
+	case JZ_LOG_TYPE_CRASH:		// 崩溃
+		_tcscat(szLogLine, _T("<!!Crash>    "));
+		break;
+	default:		// 其它
+		_tcscat(szLogLine, _T("<Unknown>    "));
+		break;
+	}
+	// 组合文件名称
+	if (szFileName != NULL)
+	{
+		_tcsncat(szLogLine, szFileName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	else
+	{
+		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	// 组合函数名称
+	if (szFuncName != NULL)
+	{
+		_tcsncat(szLogLine, szFuncName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	else
+	{
+		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	// 组合日志内容
+	_tcsncat(szLogLine, szLogContent, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	// 写入日志项
+	g_pLog->WriteLogLine(szLogLine);
+}
+
+void WriteLogString(IN JZ_LOG_TYPE eLogType,		// 日志项类型
+	IN LPCTSTR szFileName,			// 发生日志的文件
+	IN LPCTSTR szFuncName,			// 发生日志的函数
+	IN char const* szContent)			// 日志内容
+{
+	// 如果配置不输出日志，直接返回
+	if (g_pLog == NULL || g_logConf.log == 0 || eLogType < g_logConf.log_level || !szContent)
+		return;
+
+	// 如果未创建日志文件，则先创建
+	if (!g_pLog->IsOpened())
+	{
+		g_pLog->OpenFile(g_pLog->GetFilePath());
+	}
+
+	const int NXLOG_CONTENT_SIZE = 512;
+	TCHAR szLogContent[NXLOG_CONTENT_SIZE];
+	TCHAR szLogLine[(NXLOG_CONTENT_SIZE << 1)];
+	szLogContent[0] = szLogLine[0] = _T('\0');
+
+	// 组合日志项，格式为 LogType    FileName    FuncName    Content
+	switch (eLogType)		// 先组合日志项类型
+	{
+	case JZ_LOG_TYPE_MESSAGE:	// 消息
+		_tcscat(szLogLine, _T("<Message>    "));
+		break;
+	case JZ_LOG_TYPE_WARNING:	// 警告
+		_tcscat(szLogLine, _T("<Warning>    "));
+		break;
+	case JZ_LOG_TYPE_ERROR:		// 错误
+		_tcscat(szLogLine, _T("<Error!!>    "));
+		break;
+	case JZ_LOG_TYPE_CRASH:		// 崩溃
+		_tcscat(szLogLine, _T("<!!Crash>    "));
+		break;
+	default:		// 其它
+		_tcscat(szLogLine, _T("<Unknown>    "));
+		break;
+	}
+	// 组合文件名称
+	if (szFileName != NULL)
+	{
+		_tcsncat(szLogLine, szFileName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	else
+	{
+		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	// 组合函数名称
+	if (szFuncName != NULL)
+	{
+		_tcsncat(szLogLine, szFuncName, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+		_tcsncat(szLogLine, _T("    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	else
+	{
+		_tcsncat(szLogLine, _T("Unknown    "), ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	}
+	// 组合日志内容
+#if defined(_MSC_VER) && defined(UNICODE)
+	MultiByteToWideChar(CP_ACP, 0, szContent, -1, szLogContent, NXLOG_CONTENT_SIZE);
+#else
+	_tcscpy(szLogContent, szContent);
+#endif
+	_tcsncat(szLogLine, szLogContent, ((size_t)(NXLOG_CONTENT_SIZE << 1) - _tcslen(szLogLine)));
+	// 写入日志项
+	g_pLog->WriteLogLine(szLogLine);
+}
+
+JZLogAPI* g_pLogAPI;
+extern "C" _declspec(dllexport) void* JZLog_GetAPIStuPtr()
+{
+	static JZLogAPI temp = { 0 };
+	g_pLogAPI = &temp;
+	g_pLogAPI->pfnWriteLog = WriteLog;
+	g_pLogAPI->pfnWriteLogString = WriteLogString;
+	return (void*)g_pLogAPI;
 }
 
 //////////////////////////////////////////////////////////////////////////

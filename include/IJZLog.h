@@ -3,30 +3,34 @@
 
 #include <Windows.h>
 #include <tchar.h>
-#include <JZCommonImageDef.h>
+#include <JZCommonDef.h>
 
-// 接口基类
-class IJZLog
+// 日志项类型定义
+enum JZ_LOG_TYPE
 {
-public:
-	// 读图像，调用了ReadImage()函数，就要调用ReleaseImage()函数进行释放
-	virtual JZ_RESULT ReadImage(IN const char* filename, OUT JZImageBuf* pImage) = 0;
-	// 写图像
-	virtual JZ_RESULT WriteImage(JZImageBuf* pImageBuf, const char* filename) = 0;
-	// 处理图像
-	virtual JZ_RESULT ProcessImage(JZImageProcessData* pImageProcessData, JZCommonParam* pParam) = 0;
-	// 释放图像数据
-	virtual JZ_RESULT ReleaseImage(JZImageBuf* pImage) = 0;
+	JZ_LOG_TYPE_MESSAGE = 0,		// 消息
+	JZ_LOG_TYPE_WARNING,			// 警告
+	JZ_LOG_TYPE_ERROR,			// 错误
+	JZ_LOG_TYPE_CRASH,			// 崩溃
+
+	JZ_LOG_TYPE_COUNT
 };
 
-typedef JZ_RESULT(*DefGetBaseImageInterface)(IJZBaseImageProcess** ppAPI);
-typedef JZ_RESULT(*DefReleaseBaseImageInterface)(IJZBaseImageProcess*& pAPI);
+// 日志记录
+typedef void(*DefWriteLog)(IN JZ_LOG_TYPE eLogType,		// 日志项类型
+	IN LPCTSTR szFileName,			// 发生日志的文件
+	IN LPCTSTR szFuncName,			// 发生日志的函数
+	IN LPCTSTR szFormat, ...);		// 日志内容
+typedef void(*DefWriteLogString)(IN JZ_LOG_TYPE eLogType,		// 日志项类型
+	IN LPCTSTR szFileName,			// 发生日志的文件
+	IN LPCTSTR szFuncName,			// 发生日志的函数
+	IN char const* szContent);			// 日志内容
 
 // 供外部调用的接口声明
-struct JZBaseImageProcessAPI
+struct JZLogAPI
 {
-	DefGetBaseImageInterface pfnGetInterface;
-	DefReleaseBaseImageInterface pfnReleaseInterface;
+	DefWriteLog pfnWriteLog;
+	DefWriteLogString pfnWriteLogString;
 };
 
 #endif // !__IJZ_LOG_H__

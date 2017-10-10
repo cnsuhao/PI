@@ -11,11 +11,12 @@
 
 #include "UI-SingleDocumentDoc.h"
 #include "UI-SingleDocumentView.h"
-
+#include <IJZLogProc.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+#define UI_SDV_LOG_FILENAME _T("UI-SingleDocumentView.cpp")
 
 // CUISingleDocumentView
 
@@ -203,6 +204,7 @@ void CUISingleDocumentView::OnImageSmooth()
 	{
 		// 显示消息对话框   
 		 INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		 g_JZLogAPI->pfnWriteLog(JZ_LOG_TYPE_WARNING, UI_SDV_LOG_FILENAME, _T("CUISingleDocumentView::OnImageSmooth"), _T("%s"), _T("没有设置要处理的图像"));
 		 return;
 	}
 
@@ -232,6 +234,7 @@ void CUISingleDocumentView::OnImageMorph()
 	{
 		// 显示消息对话框   
 		INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		g_JZLogAPI->pfnWriteLog(JZ_LOG_TYPE_WARNING, UI_SDV_LOG_FILENAME, _T("CUISingleDocumentView::OnImageMorph"), _T("%s"), _T("没有设置要处理的图像"));
 		return;
 	}
 
@@ -302,6 +305,7 @@ void CUISingleDocumentView::OnPlateRecog()
 	{
 		// 显示消息对话框   
 		INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		g_JZLogAPI->pfnWriteLog(JZ_LOG_TYPE_WARNING, UI_SDV_LOG_FILENAME, _T("CUISingleDocumentView::OnPlateRecog"), _T("%s"), _T("没有设置要处理的图像"));
 		return;
 	}
 

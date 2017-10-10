@@ -2,17 +2,7 @@
 #define __JZ_COMMONIMAGEDEF_H__
 #include <vector>
 #include <string>
-#ifndef MAX_PATH
-#	define MAX_PATH          260
-#endif
-// 返回结果定义
-enum JZ_RESULT
-{
-	JZ_UNKNOW = -1,
-	JZ_SUCCESS,
-	JZ_FAILED,
-	JZ_INVAILD_PARAM,
-};
+#include <JZCommonDef.h>
 
 // 像素格式，目前仅支持打包像素格式，分片像素格式以后扩展
 enum JZ_PIXEL_FMT
