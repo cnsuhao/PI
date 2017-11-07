@@ -66,15 +66,12 @@ JZ_RESULT JZBaseImageProcess::ProcessImage(JZImageProcessData* pImageProcessData
 	switch (pBaseProcessParam->baseProcessType)
 	{
 	case JZ_BASEPROCESS_MORPHOLOGY:
-		_ImageMorphology(pImageProcessData, pParam);
-		break;
+		return _ImageMorphology(pImageProcessData, pParam);
 	case JZ_BASEPROCESS_SMOOTH:
-		_ImageSmooth(pImageProcessData, pParam);
-		break;
+		return _ImageSmooth(pImageProcessData, pParam);
 	default:
 		break;
 	}
-	return JZ_SUCCESS;
 }
 
 //////////////////////////////////// 内部调用的私有函数////////////////////////////////
@@ -94,12 +91,30 @@ JZ_RESULT JZBaseImageProcess::_ImageMorphology(JZImageProcessData* pImageProcess
 	Mat desImage;
 
 	JZMorphologyParam* pMorphologyParam = (JZMorphologyParam*)pParam;
-	JZ_MORPHOLOGY_TYPE morphologyType = pMorphologyParam->morphologyType;
-	int s = pMorphologyParam->elementSize * 2 + 1;
-	Mat kernel = getStructuringElement(MORPH_RECT, Size(s, s), Point(-1, -1));
+	MorphShapes cvMorphShape;
+	switch (pMorphologyParam->morphologyShape)
+	{
+	case 0:
+		cvMorphShape = MORPH_RECT;
+		break;
+	case 1:
+		cvMorphShape = MORPH_CROSS;
+		break;
+	case 2:
+		cvMorphShape = MORPH_ELLIPSE;
+		break;
+	default:
+		break;
+	}
+	if (0 == pMorphologyParam->width || 0 == pMorphologyParam->height)
+	{
+		return JZ_INVAILD_PARAM;
+	}
+	Size ksize = Size(pMorphologyParam->width, pMorphologyParam->height);
+	Mat kernel = getStructuringElement(cvMorphShape, ksize, Point(-1, -1));
 
 	MorphTypes cvMorphType;
-	switch (morphologyType)
+	switch (pMorphologyParam->morphologyType)
 	{
 	case 0:// 腐蚀
 		cvMorphType = MORPH_ERODE;

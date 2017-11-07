@@ -108,6 +108,9 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 		{
 			JZMorphologyParam* pMorphologyParam = (JZMorphologyParam*)pParam;
 			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->morphologyType = pMorphologyParam->morphologyType;
+			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->morphologyShape = pMorphologyParam->morphologyShape;
+			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->width = pMorphologyParam->width;
+			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->height = pMorphologyParam->height;
 			break;
 		}
 		default:
@@ -128,6 +131,7 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 // 根据图像处理类型进行图像处理
 JZ_RESULT JZUIEngine::ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS_TYPE baseProcessType/* = JZ_BASEPROCESS_UNKNOWN*/)
 {
+	JZ_RESULT res = JZ_UNKNOW;
 	if (JZ_IMAGE_UNKNOWN == processType)
 	{
 		return JZ_FAILED;
@@ -136,17 +140,17 @@ JZ_RESULT JZUIEngine::ProcessImage(JZ_IMAGEPROC_TYPE processType, JZ_BASEPROCESS
 	switch (processType)
 	{
 	case JZ_IMAGE_BASEPROCESS:
-		m_pBaseImageProcess->ProcessImage(&m_imageProcessData, m_mapBaseProcessParam[baseProcessType]);
+		res = m_pBaseImageProcess->ProcessImage(&m_imageProcessData, m_mapBaseProcessParam[baseProcessType]);
 		break;
 	case JZ_IMAGE_PLATERECOG:
-		m_pImagePlateRecog->ProcessImage(&m_imageProcessData, m_pPlateRecogParam);
+		res = m_pImagePlateRecog->ProcessImage(&m_imageProcessData, m_pPlateRecogParam);
 		break;
 	default:
 		break;
 	}
 
 	m_pSceneRender->SetRightImage(m_imageProcessData.pDesImage);
-	return JZ_SUCCESS;
+	return res;
 }
 
 // 获取存储的额外图像处理结果数据

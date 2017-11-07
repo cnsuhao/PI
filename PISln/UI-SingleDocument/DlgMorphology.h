@@ -25,7 +25,10 @@ public:
 	CUISingleDocumentApp* m_pApp;
 	afx_msg void OnBnClickedOk();
 	virtual BOOL OnInitDialog();
-	CComboBox m_comboMorphType;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButtonProcess();
+	CComboBox m_comboMorphType;
+	CComboBox m_comboMorphShape;
+	int m_iEditMorphWidth;
+	int m_iEditMorphHeight;
 };

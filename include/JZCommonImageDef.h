@@ -78,7 +78,7 @@ struct JZBaseProcessParam : public JZCommonParam
 	JZ_BASEPROCESS_TYPE baseProcessType;
 	JZBaseProcessParam()
 	{
-		processType = JZ_IMAGE_BASEPROCESS;
+		processType		= JZ_IMAGE_BASEPROCESS;
 		baseProcessType = JZ_BASEPROCESS_UNKNOWN;
 	}
 };
@@ -86,10 +86,10 @@ struct JZBaseProcessParam : public JZCommonParam
 // 图像平滑基本参数
 enum JZ_SMOOTH_TYPE
 {
-	JZ_SMOOTH_GAUSSIAN = 0,	// 高斯滤波
-	JZ_SMOOTH_MEAN,	// 均值滤波
-	JZ_SMOOTH_MEDIAN, // 中值滤波
-	JZ_SMOOTH_BILATERAL, // 双边滤波
+	JZ_SMOOTH_GAUSSIAN = 0,		// 高斯滤波
+	JZ_SMOOTH_MEAN,				// 均值滤波
+	JZ_SMOOTH_MEDIAN,			// 中值滤波
+	JZ_SMOOTH_BILATERAL,		// 双边滤波
 };
 
 struct JZSmoothParam : public JZBaseProcessParam
@@ -98,33 +98,46 @@ struct JZSmoothParam : public JZBaseProcessParam
 	JZSmoothParam()
 	{
 		baseProcessType = JZ_BASEPROCESS_SMOOTH;
-		smoothType = JZ_SMOOTH_GAUSSIAN;
+		smoothType		= JZ_SMOOTH_GAUSSIAN;
 	}
 };
 
 // 图像形态学处理基本参数
 enum JZ_MORPHOLOGY_TYPE
 {
-	JZ_MORPHOLOGY_ERODE, // 腐蚀
-	JZ_MORPHOLOGY_DILATE, // 膨胀
-	JZ_MORPHOLOGY_OPEN, // 开运算
-	JZ_MORPHOLOGY_CLOSE, // 闭运算
-	JZ_MORPHOLOGY_GRADIENT, // 形态学梯度
-	JZ_MORPHOLOGY_TOPHAT, // 顶帽
-	JZ_MORPHOLOGY_BLACKHAT, // 黑帽
-	JZ_MORPHOLOGY_HITMISS, // 击中击不中
+	JZ_MORPHOLOGY_ERODE,		// 腐蚀
+	JZ_MORPHOLOGY_DILATE,		// 膨胀
+	JZ_MORPHOLOGY_OPEN,			// 开运算
+	JZ_MORPHOLOGY_CLOSE,		// 闭运算
+	JZ_MORPHOLOGY_GRADIENT,		// 形态学梯度
+	JZ_MORPHOLOGY_TOPHAT,		// 顶帽
+	JZ_MORPHOLOGY_BLACKHAT,		// 黑帽
+	JZ_MORPHOLOGY_HITMISS,		// 击中击不中
 
+};
+
+enum JZ_MORPHOLOGY_SHAPE
+{
+	JZ_MORPHOLOGY_RECT,			// 矩形
+	JZ_MORPHOLOGY_CROSS,		// 交叉形
+	JZ_MORPHOLOGY_ELLIPSE,		// 椭圆形
 };
 
 // 形态学处理参数
 struct JZMorphologyParam: public JZBaseProcessParam
 {
-	JZ_MORPHOLOGY_TYPE morphologyType; // 形态学类型
-	int elementSize;  // 元素大小为: 2 * elementSize + 1
+	JZ_MORPHOLOGY_TYPE		morphologyType;		// 形态学类型
+	JZ_MORPHOLOGY_SHAPE		morphologyShape;	// 形态学结构元素形状
+	int						width;				// 结构元素宽				
+	int						height;				// 结构元素高
+	int						elementSize;		// 元素大小为: 2 * elementSize + 1
 	JZMorphologyParam()
 	{
-		baseProcessType = JZ_BASEPROCESS_MORPHOLOGY;
-		morphologyType = JZ_MORPHOLOGY_ERODE;
+		baseProcessType		= JZ_BASEPROCESS_MORPHOLOGY;
+		morphologyType		= JZ_MORPHOLOGY_ERODE;
+		morphologyShape		= JZ_MORPHOLOGY_RECT;
+		width				= 3;
+		height				= 3;
 		elementSize = 1;
 	}
 };
