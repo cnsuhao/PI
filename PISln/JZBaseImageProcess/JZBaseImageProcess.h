@@ -24,6 +24,8 @@ private:
 	JZ_RESULT _ImageMorphology(JZImageProcessData* pImageProcessData, JZCommonParam* pParam);
 	// 图像平滑处理
 	JZ_RESULT _ImageSmooth(JZImageProcessData* pImageProcessData, JZCommonParam* pParam);
+	// 图像直方图处理
+	JZ_RESULT _ImageHistogram(JZImageProcessData* pImageProcessData, JZCommonParam* pParam);
 };
 #endif // !__JZ_BASEIMAGEPROCESS_H__
 

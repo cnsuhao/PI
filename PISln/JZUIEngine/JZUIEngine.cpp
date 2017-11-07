@@ -113,6 +113,10 @@ JZ_RESULT JZUIEngine::SetProcessParam(JZCommonParam* pParam)
 			((JZMorphologyParam*)m_mapBaseProcessParam[JZ_BASEPROCESS_MORPHOLOGY])->height = pMorphologyParam->height;
 			break;
 		}
+		case JZ_BASEPROCESS_HISTOGRAM: // 图像直方图
+		{
+			break;
+		}
 		default:
 			break;
 		}
@@ -186,11 +190,12 @@ JZ_RESULT JZUIEngine::_InitImageProcessSDK()
 	// 初始化基本图像处理接口和参数
 	m_pBaseImageProcess = NULL;
 	g_JZBaseImageProcessAPI->pfnGetInterface(&m_pBaseImageProcess);
-	JZSmoothParam* smoothParam = new JZSmoothParam();
-	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_SMOOTH, smoothParam));
-	JZMorphologyParam* morphologyParam = new JZMorphologyParam();
-	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_MORPHOLOGY, morphologyParam));
-
+	JZSmoothParam* pSmoothParam = new JZSmoothParam();
+	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_SMOOTH, pSmoothParam));
+	JZMorphologyParam* pMorphologyParam = new JZMorphologyParam();
+	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_MORPHOLOGY, pMorphologyParam));
+	JZHistogramParam* pHistogramParam = new JZHistogramParam();
+	m_mapBaseProcessParam.insert(pair<JZ_BASEPROCESS_TYPE, JZCommonParam*>(JZ_BASEPROCESS_HISTOGRAM, pHistogramParam));
 	// 初始化车牌识别接口和参数
 	m_pImagePlateRecog = NULL;
 	g_JZImagePlateRecogAPI->pfnGetInterface(&m_pImagePlateRecog);

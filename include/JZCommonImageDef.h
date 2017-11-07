@@ -70,6 +70,7 @@ enum JZ_BASEPROCESS_TYPE
 	JZ_BASEPROCESS_UNKNOWN,
 	JZ_BASEPROCESS_SMOOTH,		// 图像平滑
 	JZ_BASEPROCESS_MORPHOLOGY,	// 图像形态学
+	JZ_BASEPROCESS_HISTOGRAM,	// 图像直方图
 };
 
 // 基本图像处理参数
@@ -130,7 +131,6 @@ struct JZMorphologyParam: public JZBaseProcessParam
 	JZ_MORPHOLOGY_SHAPE		morphologyShape;	// 形态学结构元素形状
 	int						width;				// 结构元素宽				
 	int						height;				// 结构元素高
-	int						elementSize;		// 元素大小为: 2 * elementSize + 1
 	JZMorphologyParam()
 	{
 		baseProcessType		= JZ_BASEPROCESS_MORPHOLOGY;
@@ -138,7 +138,15 @@ struct JZMorphologyParam: public JZBaseProcessParam
 		morphologyShape		= JZ_MORPHOLOGY_RECT;
 		width				= 3;
 		height				= 3;
-		elementSize = 1;
+	}
+};
+
+// 直方图处理参数
+struct JZHistogramParam : public JZBaseProcessParam
+{
+	JZHistogramParam()
+	{
+		baseProcessType = JZ_BASEPROCESS_HISTOGRAM;
 	}
 };
 

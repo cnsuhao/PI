@@ -815,7 +815,7 @@ const int COLUMN = 1;
 const int DOWN = 2;
 const int CLICK = 3;
 const int OVER = 4;
-const int OUT = 5;
+const int OUT1 = 5;
 
 // Constants regarding components
 const unsigned int TRACKBAR_HIDE_SEGMENT_LABELS = 1;
@@ -1226,7 +1226,7 @@ namespace internal
 
 	int iarea(int theX, int theY, int theWidth, int theHeight) {
 		// By default, return that the mouse is out of the interaction area.
-		int aRet = cvui::OUT;
+		int aRet = cvui::OUT1;
 
 		// Check if the mouse is over the interaction area.
 		bool aMouseIsOver = cv::Rect(theX, theY, theWidth, theHeight).contains(internal::gMouse);
@@ -1269,8 +1269,8 @@ namespace internal
 			}
 		}
 		else {
-			render::button(theBlock, cvui::OUT, aRect, theLabel);
-			render::buttonLabel(theBlock, cvui::OUT, aRect, theLabel, aTextSize);
+			render::button(theBlock, cvui::OUT1, aRect, theLabel);
+			render::buttonLabel(theBlock, cvui::OUT1, aRect, theLabel, aTextSize);
 		}
 
 		// Update the layout flow according to button size
@@ -1308,7 +1308,7 @@ namespace internal
 		int aStatus = cvui::iarea(theX, theY, aRect.width, aRect.height);
 
 		switch (aStatus) {
-		case cvui::OUT: render::image(theBlock, aRect, theIdle); break;
+		case cvui::OUT1: render::image(theBlock, aRect, theIdle); break;
 		case cvui::OVER: render::image(theBlock, aRect, theOver); break;
 		case cvui::DOWN: render::image(theBlock, aRect, theDown); break;
 		}
@@ -1349,7 +1349,7 @@ namespace internal
 			}
 		}
 		else {
-			render::checkbox(theBlock, cvui::OUT, aRect);
+			render::checkbox(theBlock, cvui::OUT1, aRect);
 		}
 
 		render::checkboxLabel(theBlock, aRect, theLabel, aTextSize, theColor);
@@ -1426,7 +1426,7 @@ namespace internal
 		long double aValue = *theValue;
 		bool aMouseIsOver = aContentArea.contains(internal::gMouse);
 
-		render::trackbar(theBlock, aMouseIsOver ? OVER : OUT, aContentArea, *theValue, theParams);
+		render::trackbar(theBlock, aMouseIsOver ? OVER : OUT1, aContentArea, *theValue, theParams);
 
 		if (internal::gMousePressed && aMouseIsOver) {
 			*theValue = internal::trackbarXPixelToValue(theParams, aContentArea, internal::gMouse.x);
@@ -1495,7 +1495,7 @@ namespace render
 
 		// Inside
 		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, theState == OUT ? cv::Scalar(0x42, 0x42, 0x42) : (theState == OVER ? cv::Scalar(0x52, 0x52, 0x52) : cv::Scalar(0x32, 0x32, 0x32)), CVUI_FILLED);
+		cv::rectangle(theBlock.where, theShape, theState == OUT1 ? cv::Scalar(0x42, 0x42, 0x42) : (theState == OVER ? cv::Scalar(0x52, 0x52, 0x52) : cv::Scalar(0x32, 0x32, 0x32)), CVUI_FILLED);
 	}
 
 	int putText(cvui_block_t& theBlock, int theState, cv::Scalar aColor, const std::string& theText, const cv::Point & thePosition) {
@@ -1674,7 +1674,7 @@ namespace render
 
 	void checkbox(cvui_block_t& theBlock, int theState, cv::Rect& theShape) {
 		// Outline
-		cv::rectangle(theBlock.where, theShape, theState == OUT ? cv::Scalar(0x63, 0x63, 0x63) : cv::Scalar(0x80, 0x80, 0x80));
+		cv::rectangle(theBlock.where, theShape, theState == OUT1 ? cv::Scalar(0x63, 0x63, 0x63) : cv::Scalar(0x80, 0x80, 0x80));
 
 		// Border
 		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;

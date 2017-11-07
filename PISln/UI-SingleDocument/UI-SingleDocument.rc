@@ -211,7 +211,7 @@ BEGIN
         MENUITEM "打印预览(&V)",                    ID_FILE_PRINT_PREVIEW
         MENUITEM "打印设置(&R)...",                 ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
-        MENUITEM "最近的文件",                       ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM "最近的文件",                       ID_FILE_MRU_FILE1
         MENUITEM SEPARATOR
         MENUITEM "退出(&X)",                      ID_APP_EXIT
     END
@@ -251,11 +251,12 @@ BEGIN
     BEGIN
         MENUITEM "图像平滑",                        ID_IMAGE_SMOOTH
         MENUITEM "形态学处理",                       ID_IMAGE_MORPH
-        MENUITEM "图像增强",                        ID_32778
+        MENUITEM "图像增强",                        ID_IMAGE_ENHANCE
+        MENUITEM "直方图",                         ID_IMAGE_HIST
     END
     POPUP "高级处理"
     BEGIN
-        MENUITEM "车牌识别",                        ID_32781
+        MENUITEM "车牌识别",                        ID_PLATE_RECOG
     END
     POPUP "帮助(&H)"
     BEGIN

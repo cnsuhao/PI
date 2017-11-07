@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CUISingleDocumentView, CView)
 	ON_COMMAND(ID_FILE_SAVE, &CUISingleDocumentView::OnFileSave)
 	ON_COMMAND(ID_IMAGE_MORPH, &CUISingleDocumentView::OnImageMorph)
 	ON_COMMAND(ID_32781, &CUISingleDocumentView::OnPlateRecog)
+	ON_COMMAND(ID_IMAGE_HIST, &CUISingleDocumentView::OnImageHist)
 END_MESSAGE_MAP()
 
 // CUISingleDocumentView 构造/析构
@@ -150,6 +151,38 @@ int CUISingleDocumentView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CUISingleDocumentView::OnDestroy()
+{
+	CView::OnDestroy();
+
+	// TODO: Add your message handler code here
+	if (NULL != m_pSmoothDialog)
+	{
+		delete m_pSmoothDialog;
+		m_pSmoothDialog = NULL;
+	}
+
+	if (NULL != m_pMorphologyDialog)
+	{
+		delete m_pMorphologyDialog;
+		m_pMorphologyDialog = NULL;
+	}
+}
+
+void CUISingleDocumentView::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	//m_pApp->m_pUIEngine->Render();
+	CView::OnTimer(nIDEvent);
+}
+
+
+void CUISingleDocumentView::OnSize(UINT nType, int cx, int cy)
+{
+	CView::OnSize(nType, cx, cy);
+
+	// TODO: Add your message handler code here
+}
 
 void CUISingleDocumentView::OnFileOpen()
 {
@@ -180,22 +213,28 @@ void CUISingleDocumentView::OnFileOpen()
 
 }
 
-
-void CUISingleDocumentView::OnTimer(UINT_PTR nIDEvent)
+void CUISingleDocumentView::OnFileSave()
 {
-	// TODO: Add your message handler code here and/or call default
-	//m_pApp->m_pUIEngine->Render();
-	CView::OnTimer(nIDEvent);
+	// TODO: Add your command handler code here
+	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
+	CFileDialog fileDlg(FALSE, _T("jpg"), _T("SaveImage"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, lpszFilter, this);
+
+	INT_PTR response = fileDlg.DoModal();
+	if (IDOK == response)
+	{
+		CString cstrFilePath = fileDlg.GetPathName();
+		TCHAR* tfilename = cstrFilePath.GetBuffer(0);
+		char filename[MAX_PATH] = { 0 };
+#ifdef UNICODE
+		int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
+#else
+		strcpy(filename, tfilename);
+#endif // UNICODE
+
+		m_pApp->m_pUIEngine->SaveImageData(filename);
+	}
 }
-
-
-void CUISingleDocumentView::OnSize(UINT nType, int cx, int cy)
-{
-	CView::OnSize(nType, cx, cy);
-
-	// TODO: Add your message handler code here
-}
-
 
 void CUISingleDocumentView::OnImageSmooth()
 {
@@ -255,49 +294,6 @@ void CUISingleDocumentView::OnImageMorph()
 	m_pMorphologyDialog->ShowWindow(SW_SHOW);
 }
 
-void CUISingleDocumentView::OnDestroy()
-{
-	CView::OnDestroy();
-
-	// TODO: Add your message handler code here
-	if (NULL != m_pSmoothDialog)
-	{
-		delete m_pSmoothDialog;
-		m_pSmoothDialog = NULL;
-	}
-
-	if (NULL != m_pMorphologyDialog)
-	{
-		delete m_pMorphologyDialog;
-		m_pMorphologyDialog = NULL;
-	}
-}
-
-
-void CUISingleDocumentView::OnFileSave()
-{
-	// TODO: Add your command handler code here
-	LPCTSTR lpszFilter = _T("图像文件(*.jpg)|*.jpg|所有文件(*.*)|*.*|");
-	CFileDialog fileDlg(FALSE, _T("jpg"), _T("SaveImage"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, lpszFilter, this);
-
-	INT_PTR response = fileDlg.DoModal();
-	if (IDOK == response)
-	{
-		CString cstrFilePath = fileDlg.GetPathName();
-		TCHAR* tfilename = cstrFilePath.GetBuffer(0);
-		char filename[MAX_PATH] = { 0 };
-#ifdef UNICODE
-		int len = WideCharToMultiByte(CP_ACP, 0, tfilename, -1, NULL, 0, NULL, NULL);
-		WideCharToMultiByte(CP_ACP, 0, tfilename, -1, filename, len, NULL, NULL);
-#else
-		strcpy(filename, tfilename);
-#endif // UNICODE
-
-		m_pApp->m_pUIEngine->SaveImageData(filename);
-	}
-}
-
-
 void CUISingleDocumentView::OnPlateRecog()
 {
 	// TODO: Add your command handler code here
@@ -324,4 +320,21 @@ void CUISingleDocumentView::OnPlateRecog()
 		m_pPlateRecogDialog->Create(IDD_DIALOG_PLATERECOG, this);
 	}
 	m_pPlateRecogDialog->ShowWindow(SW_SHOW);
+}
+
+
+void CUISingleDocumentView::OnImageHist()
+{
+	// TODO: Add your command handler code here
+	if (!m_pApp->m_pUIEngine->IsSetSrcImage())
+	{
+		// 显示消息对话框   
+		INT_PTR nRes = MessageBox(_T("请设置要处理的图像"), _T("错误"), MB_OK);
+		g_JZLogAPI->pfnWriteLog(JZ_LOG_TYPE_WARNING, UI_SDV_LOG_FILENAME, _T("CUISingleDocumentView::OnImageHist"), _T("%s"), _T("没有设置要处理的图像"));
+		return;
+	}
+
+	JZHistogramParam histogramParam;
+	m_pApp->m_pUIEngine->SetProcessParam(&histogramParam);
+	m_pApp->m_pUIEngine->ProcessImage(JZ_IMAGE_BASEPROCESS, JZ_BASEPROCESS_HISTOGRAM);
 }

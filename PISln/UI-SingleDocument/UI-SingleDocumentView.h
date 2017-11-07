@@ -59,6 +59,7 @@ public:
 	afx_msg void OnFileSave();
 	afx_msg void OnImageMorph();
 	afx_msg void OnPlateRecog();
+	afx_msg void OnImageHist();
 };
 
 #ifndef _DEBUG  // UI-SingleDocumentView.cpp 中的调试版本
