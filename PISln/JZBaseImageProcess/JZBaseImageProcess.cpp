@@ -198,165 +198,200 @@ JZ_RESULT JZBaseImageProcess::_ImageSmooth(JZImageProcessData* pImageProcessData
 	return JZ_SUCCESS;
 }
 
-unsigned __stdcall _drawHistogram(void* pParam)
+// 计算并得到直方图图像
+void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 {
 	int resultWidth = 600;
 	int resultHeight = 500;
-	Mat resultHist(resultHeight, resultWidth, CV_8UC3, Scalar(77, 77, 51));
+	int xBins = resultWidth / 255;
+	float rangeSingle[2] = { 0, 255 };
+	Mat templateImage(resultHeight, resultWidth, CV_8UC3, Scalar(77, 77, 51));
+	for (int i = 0; i <= resultHeight/10; i++)
+	{
+		Point p1(0, 10 * i);
+		Point p2(510, 10*i);
+		if (0 == i%10)
+		{
+			line(templateImage, p1, p2, Scalar(20, 20, 20), 2, LINE_AA);
+		}
+		else
+		{
+			line(templateImage, p1, p2, Scalar(100, 100, 100), 1, LINE_AA);
+		}
+		
+	}
+	for (int i = 0; i <= 510 / 10; i++)
+	{
+		Point p1(10*i, 0);
+		Point p2(10*i, resultHeight - 1 );
+		if (0 == i % 10)
+		{
+			line(templateImage, p1, p2, Scalar(20, 20, 20), 2, LINE_AA);
+		}
+		else
+		{
+			line(templateImage, p1, p2, Scalar(100, 100, 100), 1, LINE_AA);
+		}
+	}
 
-	Mat srcImage = *(Mat*)(pParam);
-	cv::namedWindow("直方图");
+	// 绘制hsv直方图
+	hsvHist = templateImage.clone();
+	Mat srcHSV;
+	cvtColor(src, srcHSV, COLOR_BGR2HSV);
+	std::vector<Mat> vecHSV;
+	split(srcHSV, vecHSV);
 
+	const int channelH[1] = { 0 };
+	const int channelS[1] = { 0 };
+	const int channelV[1] = { 0 };
+
+	const int hHistSize[1] = { 256 };
+	const int sHistSize[1] = { 256 };
+	const int vHistSize[1] = { 256 };
+
+	const float* hRange[1] = { rangeSingle };
+	const float* sRange[1] = { rangeSingle };
+	const float* vRange[1] = { rangeSingle };
+
+	Mat hHist, sHist, vHist;
+	calcHist(&vecHSV[0], 1, channelH, Mat(), hHist, 1, hHistSize, hRange, true);
+	calcHist(&vecHSV[1], 1, channelS, Mat(), sHist, 1, sHistSize, sRange, true);
+	calcHist(&vecHSV[2], 1, channelV, Mat(), vHist, 1, vHistSize, vRange, true);
+
+	Mat hNormHist, sNormHist, vNormHist;
+	normalize(hHist, hNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+	normalize(sHist, sNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+	normalize(vHist, vNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+
+	for (int i = 1; i < hHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(vNormHist.at<float>(i - 1)) - resultHeight*0.1);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(vNormHist.at<float>(i)) - resultHeight*0.1);
+		line(hsvHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
+	}
+	for (int i = 1; i < sHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(sNormHist.at<float>(i - 1)) - resultHeight*0.4);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(sNormHist.at<float>(i)) - resultHeight*0.4);
+		line(hsvHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
+	}
+	for (int i = 1; i < vHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(hNormHist.at<float>(i - 1)) - resultHeight*0.7);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(hNormHist.at<float>(i)) - resultHeight*0.7);
+		line(hsvHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
+	}
+
+	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.2, "H", 1.2, 0xff0000);
+	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.5, "S", 1.2, 0x00ff00);
+	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.8, "V", 1.2, 0x0000ff);
+
+	// 绘制bgr直方图
+	bgrHist = templateImage.clone();
+	std::vector<Mat> vecBGR;
+	split(src, vecBGR);
+
+	const int channelB[1] = { 0 };
+	const int channelG[1] = { 0 };
+	const int channelR[1] = { 0 };
+
+	const int bHistSize[1] = { 256 };
+	const int gHistSize[1] = { 256 };
+	const int rHistSize[1] = { 256 };
+
+	const float* bRange[1] = { rangeSingle };
+	const float* gRange[1] = { rangeSingle };
+	const float* rRange[1] = { rangeSingle };
+
+	Mat bHist, gHist, rHist;
+	calcHist(&vecBGR[0], 1, channelB, Mat(), bHist, 1, bHistSize, bRange, true);
+	calcHist(&vecBGR[1], 1, channelG, Mat(), gHist, 1, gHistSize, gRange, true);
+	calcHist(&vecBGR[2], 1, channelR, Mat(), rHist, 1, rHistSize, rRange, true);
+
+	Mat bNormHist, gNormHist, rNormHist;
+	normalize(bHist, bNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+	normalize(gHist, gNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+	normalize(rHist, rNormHist, 0, resultHeight*0.2, NORM_MINMAX);
+
+	for (int i = 1; i < bHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(rNormHist.at<float>(i - 1)) - resultHeight*0.1);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(rNormHist.at<float>(i)) - resultHeight*0.1);
+		line(bgrHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
+	}
+	for (int i = 1; i < gHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(gNormHist.at<float>(i - 1)) - resultHeight*0.4);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(gNormHist.at<float>(i)) - resultHeight*0.4);
+		line(bgrHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
+	}
+	for (int i = 1; i < rHistSize[0]; i++)
+	{
+		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(bNormHist.at<float>(i - 1)) - resultHeight*0.7);
+		Point p2 = Point(xBins*(i), resultHeight - cvRound(bNormHist.at<float>(i)) - resultHeight*0.7);
+		line(bgrHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
+	}
+
+	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.2, "B", 1.2, 0xff0000);
+	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.5, "G", 1.2, 0x00ff00);
+	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.8, "R", 1.2, 0x0000ff);
+}
+
+unsigned __stdcall _HistogramThread(void* pParam)
+{
+	JZImageBuf* psrc = (JZImageBuf*)(pParam);
+	Mat srcImage(Size(psrc->width, psrc->height), CV_8UC3);
+	int iImageBytes = psrc->height * psrc->pitch;
+	memcpy_s(srcImage.data, iImageBytes, psrc->color, iImageBytes);
+
+	Mat bgrHist, hsvHist;
+	_DrawHistogram(srcImage, bgrHist, hsvHist);
+
+	Mat templateImage(bgrHist.rows+100, bgrHist.cols, CV_8UC3, Scalar(77, 77, 51));
+	Mat resultHist = templateImage.clone();
+	Rect histRect = Rect(0, 100, bgrHist.cols, bgrHist.rows);
+	cv::namedWindow("直方图"); // 创建了一定要记得手动释放，不然会有问题
 	cvui::init("直方图", 20);
 	
 	while (true)
 	{
-		bool bBGRHist = cvui::button(resultHist, 200, 5, "BGR直方图");
-		bool bHSVHist = cvui::button(resultHist, 400, 5, "HSV直方图");
-
+		bool bBGRHist = cvui::button(resultHist, 50, 40, "BGR-Histogram");
+		bool bHSVHist = cvui::button(resultHist, 250, 40, "HSV-Histogram");
+		bool bQuit = cvui::button(resultHist, 450, 40, "Quit");
+		if (bQuit)
+		{
+			destroyWindow("直方图");
+			break;
+		}
 		if (bHSVHist)
 		{
-			Mat srcHSV;
-			cvtColor(srcImage, srcHSV, COLOR_BGR2HSV);
-			std::vector<Mat> vecHSV;
-			split(srcHSV, vecHSV);
-
-			//单色直方图
-			const int channelH[1] = { 0 };
-			const int channelS[1] = { 0 };
-			const int channelV[1] = { 0 };
-
-			const int hHistSize[1] = { 256 };
-			const int sHistSize[1] = { 256 };
-			const int vHistSize[1] = { 256 };
-
-			float rangeSingle[2] = { 0, 255 };
-			const float* hRange[1] = { rangeSingle };
-			const float* sRange[1] = { rangeSingle };
-			const float* vRange[1] = { rangeSingle };
-
-			Mat hHist, sHist, vHist;
-			calcHist(&vecHSV[0], 1, channelH, Mat(), hHist, 1, hHistSize, hRange, true);
-			calcHist(&vecHSV[1], 1, channelS, Mat(), sHist, 1, sHistSize, sRange, true);
-			calcHist(&vecHSV[2], 1, channelV, Mat(), vHist, 1, vHistSize, vRange, true);
-
-			Mat hNormHist, sNormHist, vNormHist;
-			normalize(hHist, hNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-			normalize(sHist, sNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-			normalize(vHist, vNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-
-
-			int xBins = resultWidth / 255;
-			for (int i = 1; i < hHistSize[0]; i++)
-			{
-				Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(vNormHist.at<float>(i - 1)) - resultHeight*0.1);
-				Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(vNormHist.at<float>(i)) - resultHeight*0.1);
-				line(resultHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
-			}
-			for (int i = 1; i < sHistSize[0]; i++)
-			{
-				Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(sNormHist.at<float>(i - 1)) - resultHeight*0.4);
-				Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(sNormHist.at<float>(i)) - resultHeight*0.4);
-				line(resultHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
-			}
-			for (int i = 1; i < vHistSize[0]; i++)
-			{
-				Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(hNormHist.at<float>(i - 1)) - resultHeight*0.7);
-				Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(hNormHist.at<float>(i)) - resultHeight*0.7);
-				line(resultHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
-			}
-
-			cvui::text(resultHist, resultWidth*0.9, resultHeight*0.2, "H", 1.2, 0xff0000);
-			cvui::text(resultHist, resultWidth*0.9, resultHeight*0.5, "S", 1.2, 0x00ff00);
-			cvui::text(resultHist, resultWidth*0.9, resultHeight*0.8, "V", 1.2, 0x0000ff);
+			templateImage.copyTo(resultHist);
+			hsvHist.copyTo(resultHist(histRect));
 		}
 
+		if (bBGRHist)
+		{
+			templateImage.copyTo(resultHist);
+			bgrHist.copyTo(resultHist(histRect));
+		}
+		cvui::update();
 		imshow("直方图", resultHist);
 	}
-	
+
+	return 0;
 }
 
 JZ_RESULT JZBaseImageProcess::_ImageHistogram(JZImageProcessData* pImageProcessData, JZCommonParam* pParam)
 {
 	JZImageBuf* psrc = pImageProcessData->pSrcImage;
-	JZImageBuf* pdes = pImageProcessData->pDesImage;
-	Mat srcImage(Size(psrc->width, psrc->height), CV_8UC3);
-	int iImageBytes = psrc->height * psrc->pitch;
-	memcpy_s(srcImage.data, iImageBytes, psrc->color, iImageBytes);
 
 	unsigned threadID;
-	HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, _drawHistogram, &srcImage, 0, &threadID);
-
-	int resultWidth = 600;
-	int resultHeight = 500;
-	Mat resultHist(resultHeight, resultWidth, CV_8UC3, Scalar(77, 77, 51));
-	//cv::namedWindow("直方图");
-
-	//cvui::init("直方图", 20);
-	//bool bBGRHist = cvui::button(resultHist, 200, 5, "BGR直方图");
-	//bool bHSVHist = cvui::button(resultHist, 400, 5, "HSV直方图");
-
-	//if (bHSVHist)
-	//{
-		Mat srcHSV;
-		cvtColor(srcImage, srcHSV, COLOR_BGR2HSV);
-		std::vector<Mat> vecHSV;
-		split(srcHSV, vecHSV);
-
-		//单色直方图
-		const int channelH[1] = { 0 };
-		const int channelS[1] = { 0 };
-		const int channelV[1] = { 0 };
-
-		const int hHistSize[1] = { 256 };
-		const int sHistSize[1] = { 256 };
-		const int vHistSize[1] = { 256 };
-
-		float rangeSingle[2] = { 0, 255 };
-		const float* hRange[1] = { rangeSingle };
-		const float* sRange[1] = { rangeSingle };
-		const float* vRange[1] = { rangeSingle };
-
-		Mat hHist, sHist, vHist;
-		calcHist(&vecHSV[0], 1, channelH, Mat(), hHist, 1, hHistSize, hRange, true);
-		calcHist(&vecHSV[1], 1, channelS, Mat(), sHist, 1, sHistSize, sRange, true);
-		calcHist(&vecHSV[2], 1, channelV, Mat(), vHist, 1, vHistSize, vRange, true);
-
-		Mat hNormHist, sNormHist, vNormHist;
-		normalize(hHist, hNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-		normalize(sHist, sNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-		normalize(vHist, vNormHist, 0, resultHeight*0.2, NORM_MINMAX);
-
-
-		int xBins = resultWidth / 255;
-		for (int i = 1; i < hHistSize[0]; i++)
-		{
-			Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(vNormHist.at<float>(i - 1)) - resultHeight*0.1);
-			Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(vNormHist.at<float>(i)) - resultHeight*0.1);
-			line(resultHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
-		}
-		for (int i = 1; i < sHistSize[0]; i++)
-		{
-			Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(sNormHist.at<float>(i - 1)) - resultHeight*0.4);
-			Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(sNormHist.at<float>(i)) - resultHeight*0.4);
-			line(resultHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
-		}
-		for (int i = 1; i < vHistSize[0]; i++)
-		{
-			Point p1 = Point(5 + xBins*(i - 1), resultHeight - cvRound(hNormHist.at<float>(i - 1)) - resultHeight*0.7);
-			Point p2 = Point(5 + xBins*(i), resultHeight - cvRound(hNormHist.at<float>(i)) - resultHeight*0.7);
-			line(resultHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
-		}
-
-		cvui::text(resultHist, resultWidth*0.9, resultHeight*0.2, "H", 1.2, 0xff0000);
-		cvui::text(resultHist, resultWidth*0.9, resultHeight*0.5, "S", 1.2, 0x00ff00);
-		cvui::text(resultHist, resultWidth*0.9, resultHeight*0.8, "V", 1.2, 0x0000ff);
-	/*}
-	cvui::update();*/
-	imshow("直方图", resultHist);
+	HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, _HistogramThread, psrc, 0, &threadID);
 
 	return JZ_SUCCESS;
 }
+
+
 
 //////////////////////////////////////////导出的接口////////////////////////////////
 JZ_RESULT GetInterface(IJZBaseImageProcess** ppAPI) 

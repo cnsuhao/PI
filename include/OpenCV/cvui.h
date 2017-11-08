@@ -1772,6 +1772,9 @@ void init(const cv::String& theWindowName, int theDelayWaitKey) {
 	internal::gDelayWaitKey = theDelayWaitKey;
 	internal::gLastKeyPressed = -1;
 	//TODO: init gScreen here?
+	internal::gMouseJustReleased = false;
+	internal::gMousePressed = false;
+	internal::gMouse = cv::Point(0, 0);
 }
 
 int lastKeyPressed() {
