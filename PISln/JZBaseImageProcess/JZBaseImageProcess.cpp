@@ -206,11 +206,11 @@ void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 	int xBins = resultWidth / 255;
 	float rangeSingle[2] = { 0, 255 };
 	Mat templateImage(resultHeight, resultWidth, CV_8UC3, Scalar(77, 77, 51));
-	for (int i = 0; i <= resultHeight/10; i++)
+	for (int i = 0; i <= resultHeight / 10; i++)
 	{
 		Point p1(0, 10 * i);
-		Point p2(510, 10*i);
-		if (0 == i%10)
+		Point p2(510, 10 * i);
+		if (0 == i % 10)
 		{
 			line(templateImage, p1, p2, Scalar(20, 20, 20), 2, LINE_AA);
 		}
@@ -218,12 +218,12 @@ void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 		{
 			line(templateImage, p1, p2, Scalar(100, 100, 100), 1, LINE_AA);
 		}
-		
+
 	}
 	for (int i = 0; i <= 510 / 10; i++)
 	{
-		Point p1(10*i, 0);
-		Point p2(10*i, resultHeight - 1 );
+		Point p1(10 * i, 0);
+		Point p2(10 * i, resultHeight - 1);
 		if (0 == i % 10)
 		{
 			line(templateImage, p1, p2, Scalar(20, 20, 20), 2, LINE_AA);
@@ -234,8 +234,8 @@ void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 		}
 	}
 
-	// 绘制hsv直方图
-	hsvHist = templateImage.clone();
+	//【1】绘制hsv直方图
+	Mat hsvHist0 = templateImage.clone();
 	Mat srcHSV;
 	cvtColor(src, srcHSV, COLOR_BGR2HSV);
 	std::vector<Mat> vecHSV;
@@ -267,27 +267,37 @@ void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(vNormHist.at<float>(i - 1)) - resultHeight*0.1);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(vNormHist.at<float>(i)) - resultHeight*0.1);
-		line(hsvHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
+		line(hsvHist0, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
 	}
 	for (int i = 1; i < sHistSize[0]; i++)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(sNormHist.at<float>(i - 1)) - resultHeight*0.4);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(sNormHist.at<float>(i)) - resultHeight*0.4);
-		line(hsvHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
+		line(hsvHist0, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
 	}
 	for (int i = 1; i < vHistSize[0]; i++)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(hNormHist.at<float>(i - 1)) - resultHeight*0.7);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(hNormHist.at<float>(i)) - resultHeight*0.7);
-		line(hsvHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
+		line(hsvHist0, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
 	}
 
-	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.2, "H", 1.2, 0xff0000);
-	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.5, "S", 1.2, 0x00ff00);
-	cvui::text(hsvHist, resultWidth*0.9, resultHeight*0.8, "V", 1.2, 0x0000ff);
+	cvui::text(hsvHist0, resultWidth*0.9, resultHeight*0.2, "H", 1.2, 0xff0000);
+	cvui::text(hsvHist0, resultWidth*0.9, resultHeight*0.5, "S", 1.2, 0x00ff00);
+	cvui::text(hsvHist0, resultWidth*0.9, resultHeight*0.8, "V", 1.2, 0x0000ff);
 
-	// 绘制bgr直方图
-	bgrHist = templateImage.clone();
+	// 给图形下方添加坐标
+	hsvHist = Mat(resultHeight + 50, resultWidth + 50, CV_8UC3, Scalar(77, 77, 51));
+	hsvHist0.copyTo(hsvHist(Rect(50, 0, resultWidth, resultHeight)));
+	cvui::text(hsvHist, 45, 510, "0", 0.8);
+	cvui::text(hsvHist, 135, 510, "50", 0.8);
+	cvui::text(hsvHist, 225, 510, "100", 0.8);
+	cvui::text(hsvHist, 325, 510, "150", 0.8);
+	cvui::text(hsvHist, 425, 510, "200", 0.8);
+	cvui::text(hsvHist, 525, 510, "250", 0.8);
+
+	//【2】绘制bgr直方图
+	Mat bgrHist0 = templateImage.clone();
 	std::vector<Mat> vecBGR;
 	split(src, vecBGR);
 
@@ -317,24 +327,34 @@ void _DrawHistogram(Mat src, Mat& bgrHist, Mat& hsvHist)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(rNormHist.at<float>(i - 1)) - resultHeight*0.1);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(rNormHist.at<float>(i)) - resultHeight*0.1);
-		line(bgrHist, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
+		line(bgrHist0, p1, p2, Scalar(255, 0, 0), 1, LINE_AA);
 	}
 	for (int i = 1; i < gHistSize[0]; i++)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(gNormHist.at<float>(i - 1)) - resultHeight*0.4);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(gNormHist.at<float>(i)) - resultHeight*0.4);
-		line(bgrHist, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
+		line(bgrHist0, p1, p2, Scalar(0, 255, 0), 1, LINE_AA);
 	}
 	for (int i = 1; i < rHistSize[0]; i++)
 	{
 		Point p1 = Point(xBins*(i - 1), resultHeight - cvRound(bNormHist.at<float>(i - 1)) - resultHeight*0.7);
 		Point p2 = Point(xBins*(i), resultHeight - cvRound(bNormHist.at<float>(i)) - resultHeight*0.7);
-		line(bgrHist, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
+		line(bgrHist0, p1, p2, Scalar(0, 0, 255), 1, LINE_AA);
 	}
 
-	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.2, "B", 1.2, 0xff0000);
-	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.5, "G", 1.2, 0x00ff00);
-	cvui::text(bgrHist, resultWidth*0.9, resultHeight*0.8, "R", 1.2, 0x0000ff);
+	cvui::text(bgrHist0, resultWidth*0.9, resultHeight*0.2, "B", 1.2, 0xff0000);
+	cvui::text(bgrHist0, resultWidth*0.9, resultHeight*0.5, "G", 1.2, 0x00ff00);
+	cvui::text(bgrHist0, resultWidth*0.9, resultHeight*0.8, "R", 1.2, 0x0000ff);
+
+	// 给图形下方添加坐标
+	bgrHist = Mat(resultHeight + 50, resultWidth + 50, CV_8UC3, Scalar(77, 77, 51));
+	bgrHist0.copyTo(bgrHist(Rect(50, 0, resultWidth, resultHeight)));
+	cvui::text(bgrHist, 45, 510, "0", 0.8);
+	cvui::text(bgrHist, 135, 510, "50", 0.8);
+	cvui::text(bgrHist, 225, 510, "100", 0.8);
+	cvui::text(bgrHist, 325, 510, "150", 0.8);
+	cvui::text(bgrHist, 425, 510, "200", 0.8);
+	cvui::text(bgrHist, 525, 510, "250", 0.8);
 }
 
 unsigned __stdcall _HistogramThread(void* pParam)
@@ -355,9 +375,11 @@ unsigned __stdcall _HistogramThread(void* pParam)
 	
 	while (true)
 	{
-		bool bBGRHist = cvui::button(resultHist, 50, 40, "BGR-Histogram");
-		bool bHSVHist = cvui::button(resultHist, 250, 40, "HSV-Histogram");
-		bool bQuit = cvui::button(resultHist, 450, 40, "Quit");
+		cvui::text(resultHist, 70, 5, "        Don't click window close button!", 0.5, 0xEE0000);
+		cvui::text(resultHist, 70, 20, "You can use shortcup in bracket instead of button!", 0.5, 0xEE0000);
+		bool bBGRHist = cvui::button(resultHist, 50, 50, "&BGR-Histogram(B)");
+		bool bHSVHist = cvui::button(resultHist, 250, 50, "&HSV-Histogram(H)");
+		bool bQuit = cvui::button(resultHist, 450, 50, "&Quit(Q)");
 		if (bQuit)
 		{
 			destroyWindow("直方图");
